@@ -6,6 +6,7 @@
 <title>DNS - Devoluciones</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -189,8 +190,37 @@
   .overlay.show { display: flex; }
   .modal {
     background: #fff; border-radius: 12px; padding: 22px; width: 100%; max-width: 420px;
-    max-height: 85vh; overflow-y: auto;
+    max-height: 85vh; overflow-y: auto; position: relative;
   }
+  .modalCloseX {
+    position: absolute; top: 14px; right: 14px; width: 28px; height: 28px; border-radius: 50%;
+    border: none; background: #F1F2F5; color: #6B6D74; font-size: 16px; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modalCloseX:hover { background: #E8E9ED; color: #1A1D24; }
+
+  /* POPOVER día del calendario */
+  .dayPopover {
+    display: none; position: fixed; background: #fff; border: 1px solid #E8E9ED; border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(20,22,28,.18); z-index: 60; min-width: 260px; max-width: 340px;
+  }
+  .dayPopover.show { display: block; }
+  .dayPopoverHead {
+    display: flex; align-items: center; justify-content: space-between; padding: 8px 10px;
+    border-bottom: 1px solid #E8E9ED; font-size: 12px; font-weight: 700;
+  }
+  .dayPopoverClose {
+    border: none; background: none; color: #8A8F9C; font-size: 14px; cursor: pointer; line-height: 1; padding: 2px 4px;
+  }
+  .dayPopoverClose:hover { color: #1A1D24; }
+  .dayPopoverList { max-height: 480px; overflow-y: auto; padding: 4px; }
+  .dayPopoverRow {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 5px 8px; border-radius: 6px; font-size: 11px;
+  }
+  .dayPopoverRow:hover { background: #FAFBFC; }
+  .dayPopoverRow .prov { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dayPopoverRow .hora { color: #6B6D74; white-space: nowrap; flex-shrink: 0; }
   .modal h3 { margin: 0 0 14px; font-size: 16px; }
   .modal label { font-size: 12px; color: #666; display: block; margin-bottom: 4px; margin-top: 10px; }
   .modal input, .modal select {
@@ -242,6 +272,7 @@
   #btnTabFacturaciones.active, #btnTabRoles.active { background: #FF7D7D; }
 
   #semanaTable th { font-size: 11px; font-weight: 600; text-align: center; padding: 6px 2px; background: #FAFBFC; color: #1A1D24; border-bottom: 1px solid #eee; }
+  #semanaTable th[onclick]:hover { background: #F0F0EC; color: #B3261E; }
   #semanaTable .timeCell { font-size: 10px; color: #8A8F9C; text-align: right; padding-right: 6px; width: 46px; white-space: nowrap; vertical-align: top; }
   #semanaTable .freeCell { height: 22px; background: #FAFBFC; cursor: pointer; border: 1px solid #fff; }
   #semanaTable .freeCell:hover { background: #F0F0EC; }
@@ -284,11 +315,11 @@
 
   .facturaCard {
     background: #fff; border: 1px solid #E8E9ED; border-left: 3px solid #FF7D7D; border-radius: 6px;
-    padding: 8px 10px; margin-bottom: 8px; cursor: pointer; font-size: 12px;
+    padding: 5px 7px; margin-bottom: 5px; cursor: pointer; font-size: 10.5px;
   }
   .facturaCard:hover { background: #FAF8F4; }
-  .facturaCard .fcProv { font-weight: 600; color: #1A1D24; margin-bottom: 2px; }
-  .facturaCard .fcFecha { color: #8A8F9C; font-size: 11px; }
+  .facturaCard .fcProv { font-weight: 600; color: #1A1D24; margin-bottom: 1px; font-size: 10.5px; }
+  .facturaCard .fcFecha { color: #8A8F9C; font-size: 9.5px; }
 
 /* ===== MODULO PICKING ===== */
 
@@ -349,11 +380,34 @@
   tr:hover td{background:#FAFBFC;}
   .pk-code{font-family:var(--mono);font-size:11.5px;}
   .pk-motivo{font-weight:600;}
+  .pk-taskGrid{display:flex;flex-direction:column;gap:8px;margin:12px 0;}
+  .pk-taskBlock{border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+  .pk-taskTopRow{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding-bottom:8px;
+    margin-bottom:10px;border-bottom:1px solid var(--border);font-size:11px;}
+  .pk-taskTopRow .pk-taskUbicHead{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.03em;}
+  .pk-taskTopRow .pk-taskTipo{color:var(--muted);}
+  .pk-taskTopRow .pk-taskOla{color:var(--faint);margin-left:auto;}
+  .pk-taskBody{display:flex;gap:16px;align-items:flex-start;}
+  .pk-taskLeft{flex-shrink:0;width:150px;display:flex;flex-direction:column;gap:6px;}
+  .pk-taskBarcode{width:100%;aspect-ratio:3/2;display:flex;align-items:center;justify-content:center;
+    background:#FAFBFC;border:1px solid var(--border);border-radius:5px;overflow:hidden;}
+  .pk-taskBarcode svg{width:92%;height:92%;}
+  .pk-barcodePending{font-size:9px;color:var(--faint);}
+  .pk-barcodeError{font-size:9px;color:var(--late-tx);text-align:center;padding:0 4px;}
+  .pk-taskNro{font-family:var(--mono);font-weight:700;font-size:12.5px;}
+  .pk-taskRight{flex:1;min-width:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+    gap:2px 18px;align-content:start;}
+  .pk-taskUbicLine{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-top:1px dashed var(--border);font-size:11.5px;}
   .pk-m-canje{color:#8A5A00;} .pk-m-falla{color:#B33A3A;} .pk-m-reclamo{color:#7A4E00;}
   .pk-m-acuerdo{color:#27500A;} .pk-m-digemid{color:#3B5AA6;}
   .pk-num{text-align:right;font-variant-numeric:tabular-nums;}
   .pk-totRow td{background:#F1F2F5;font-weight:700;border-top:2px solid var(--border);}
   .pk-scrollX{overflow-x:auto;}
+  .pk-detalleScroll{max-height:65vh;overflow-y:auto;scrollbar-width:auto;}
+  .pk-detalleScroll::-webkit-scrollbar{width:12px;height:12px;}
+  .pk-detalleScroll::-webkit-scrollbar-track{background:#F1F2F5;}
+  .pk-detalleScroll::-webkit-scrollbar-thumb{background:#C7CAD1;border-radius:6px;border:2px solid #F1F2F5;}
+  .pk-detalleScroll::-webkit-scrollbar-thumb:hover{background:#A9ADB6;}
   .pk-estadoPill{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;}
   .pk-est-asignado{background:#FDEECB;color:#7A4E00;} .pk-est-finalizado{background:#EAF3DE;color:#27500A;}
   .pk-est-cancelado{background:#FFE3E1;color:#B33A3A;}
@@ -365,23 +419,23 @@
     padding:1px 8px;border-radius:20px;text-transform:none;letter-spacing:0;}
   .pk-pkRowActions{display:flex;gap:6px;}
   .pk-iconBtnOk{border-color:#C9DDB0;color:var(--ok-tx);background:var(--ok-bg);}
-  .pk-ticket{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:10px;
-    margin-bottom:10px;overflow:hidden;cursor:pointer;}
-  .pk-ticketBar{width:5px;flex-shrink:0;}
+  .pk-ticket{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:8px;
+    margin-bottom:6px;overflow:hidden;cursor:pointer;}
+  .pk-ticketBar{width:4px;flex-shrink:0;}
   .pk-ok .pk-ticketBar{background:var(--ok-dot);} .pk-warn .pk-ticketBar{background:var(--warn-dot);}
   .pk-late .pk-ticketBar{background:var(--late-dot);}
-  .pk-ticketBody{flex:1;padding:12px 16px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
-  .pk-ticketProv{min-width:220px;}
-  .pk-ticketProv .pk-name{font-weight:700;font-size:13.5px;}
-  .pk-ticketProv .pk-code{color:var(--faint);}
-  .pk-badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;display:inline-flex;
-    align-items:center;gap:5px;}
+  .pk-ticketBody{flex:1;padding:7px 12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .pk-ticketProv{min-width:160px;}
+  .pk-ticketProv .pk-name{font-weight:700;font-size:12px;}
+  .pk-ticketProv .pk-code{color:var(--faint);font-size:10.5px;}
+  .pk-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;display:inline-flex;
+    align-items:center;gap:4px;}
   .pk-ok .pk-badge{background:var(--ok-bg);color:var(--ok-tx);}
   .pk-warn .pk-badge{background:var(--warn-bg);color:var(--warn-tx);}
   .pk-late .pk-badge{background:var(--late-bg);color:var(--late-tx);}
-  .pk-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;}
+  .pk-badge::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;}
   .pk-metric{text-align:center;}
-  .pk-metric .pk-v{font-size:15px;font-weight:700;} .pk-metric .pk-l{font-size:10.5px;color:var(--faint);
+  .pk-metric .pk-v{font-size:12.5px;font-weight:700;} .pk-metric .pk-l{font-size:9px;color:var(--faint);
     text-transform:uppercase;letter-spacing:.03em;}
   .pk-ticketActions{margin-left:auto;display:flex;gap:8px;}
   .pk-iconBtn{border:1px solid var(--border);background:var(--surface);border-radius:7px;
@@ -389,23 +443,37 @@
 
   .pk-dateMenu{display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--surface);
     border:1px solid var(--border);border-radius:9px;box-shadow:0 8px 24px rgba(20,22,28,.12);
-    padding:10px;width:230px;z-index:20;}
+    padding:10px;width:236px;z-index:20;}
   .pk-dateMenu.show{display:block;}
-  .pk-dateMenuHead{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.03em;
-    margin-bottom:6px;padding:0 2px;}
-  .pk-dateMenu label{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:6px 4px;
-    border-radius:6px;cursor:pointer;}
-  .pk-dateMenu label:hover{background:var(--bg);}
-  .pk-dateMenu .pk-dcount{margin-left:auto;color:var(--faint);font-size:11px;}
-  .pk-dateMenuFoot{display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+  .pk-calHead{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;font-weight:700;padding:2px 2px 8px;}
+  .pk-calNav{border:1px solid var(--border);background:var(--surface);border-radius:6px;width:24px;height:24px;
+    cursor:pointer;font-size:13px;color:var(--muted);}
+  .pk-calNav:hover{background:var(--bg);}
+  .pk-calQuick{display:flex;gap:6px;margin-bottom:8px;}
+  .pk-calQuickBtn{flex:1;border:1px solid var(--border);background:var(--surface);border-radius:6px;
+    padding:4px 0;font-size:11px;font-weight:600;color:var(--ink);cursor:pointer;}
+  .pk-calQuickBtn:hover{background:var(--bg);}
+  .pk-calGridHead{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:10px;
+    color:var(--faint);margin-bottom:2px;}
+  .pk-calGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+  .pk-calGrid span{display:flex;align-items:center;justify-content:center;height:26px;border-radius:6px;font-size:11.5px;}
+  .pk-calSinCita{color:#D5D7DC;}
+  .pk-calConCita{cursor:pointer;color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1px var(--border);}
+  .pk-calConCita:hover{background:var(--bg);}
+  .pk-calMarcado{background:var(--ink) !important;color:#fff !important;box-shadow:none !important;}
+  .pk-calFoot{font-size:10px;color:var(--faint);margin-top:8px;padding-top:6px;border-top:1px solid var(--border);}
   .pk-filterNote{font-size:11.5px;color:var(--faint);margin:-6px 0 14px;}
 
-  .pk-ubicPanel{display:none;margin-bottom:16px;}
+  .pk-ubicPanel{display:none;position:fixed;background:var(--surface);border:1px solid var(--border);
+    border-radius:10px;box-shadow:0 10px 30px rgba(20,22,28,.18);z-index:60;width:420px;max-width:90vw;}
   .pk-ubicPanel.show{display:block;}
-  .pk-ubicPanelHead{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;
+  .pk-ubicPanelHead{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;
     border-bottom:1px solid var(--border);}
-  .pk-ubicPanelHead h4{margin:0;font-size:13px;}
-  .pk-ubicPanelHead .pk-sub{font-size:11.5px;color:var(--faint);margin-top:2px;}
+  .pk-ubicPanelHead h4{margin:0;font-size:12px;}
+  .pk-ubicPanelHead .pk-sub{font-size:10px;color:var(--faint);margin-top:1px;}
+  .pk-ubicPanel table{font-size:11px;}
+  .pk-ubicPanel td,.pk-ubicPanel th{padding:5px 8px;}
+  .pk-ubicPanel .pk-scrollX{max-height:320px;overflow-y:auto;}
 
   .pk-sheet{display:none;}
   .pk-sheet.show{display:block;margin-top:14px;}
@@ -418,13 +486,16 @@
   .pk-sheetMeta div:nth-child(2n){border-right:none;}
   .pk-sheetMeta .pk-lbl{color:var(--faint);font-size:10.5px;text-transform:uppercase;margin-bottom:2px;}
 
+  @page{ size: A4; margin: 14mm 12mm; }
+
   @media print{
-    header,.pk-tabs,.pk-toolbar,.pk-ticketActions,.pk-btnGhost,.pk-printOnlyHide{display:none !important;}
+    header,#tabBar,.sidebar,.sidebarBackdrop,.pk-tabs,.pk-toolbar,.pk-ticketActions,.pk-btnGhost,.pk-printOnlyHide{display:none !important;}
     body{background:#fff;}
     .pk-wrap{padding:0;max-width:none;}
-    .pk-sheet{display:block !important;margin:0;}
-    .pk-sheet{page-break-after:always;}
-    .pk-sheet:last-of-type{page-break-after:auto;}
+    .pk-sheet{display:none !important;}
+    .pk-sheet.show{display:block !important;margin:0;}
+    .pk-sheet{page-break-after:always;break-after:page;}
+    .pk-taskBlock{break-inside:avoid;page-break-inside:avoid;}
     .pk-ticket{display:none !important;}
     .pk-sectionLbl,.pk-ubicPanel,.pk-filterNote{display:none !important;}
     .pk-card{border:none;}
@@ -607,15 +678,19 @@
           <span id="semanaLabel" style="font-size:13px;font-weight:500"></span>
           <button class="secondary" onclick="cambiarSemana(7)">Semana siguiente ›</button>
         </div>
-        <div style="display:flex;gap:12px;align-items:flex-start">
-          <div style="overflow-x:auto;flex:1">
-            <table id="semanaTable" style="min-width:760px;table-layout:fixed">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div style="overflow-x:auto;flex:1;min-width:0">
+            <table id="semanaTable" style="min-width:660px;table-layout:fixed">
               <thead><tr id="semanaHeadRow"></tr></thead>
               <tbody id="semanaBody" style="position:relative"></tbody>
             </table>
           </div>
-          <div style="width:260px;flex-shrink:0;background:#FAFBFC;border:1px solid #E8E9ED;border-radius:8px;padding:10px;max-height:560px;overflow-y:auto">
+          <div style="width:210px;flex-shrink:0;background:#FAFBFC;border:1px solid #E8E9ED;border-radius:8px;padding:10px;max-height:560px;overflow-y:auto">
             <p style="font-size:11px;font-weight:600;color:#6B6D74;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 8px">Facturaciones pendientes</p>
+            <div class="searchBox" style="margin-bottom:8px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+              <input type="text" id="facturacionesPendientesFiltro" placeholder="Filtrar..." oninput="loadFacturacionesPendientes()" style="font-size:11px">
+            </div>
             <div id="facturacionesPendientesLista"></div>
             <div id="facturacionesPendientesEmpty" style="font-size:12px;color:#8A8F9C;display:none">No hay pendientes.</div>
           </div>
@@ -716,6 +791,8 @@
               Vista de solo lectura. Muestra todas las facturaciones registradas.
             </div>
             <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:12px;flex-wrap:wrap">
+              <div><label style="font-size:12px;color:#6B6D74;display:block;margin-bottom:4px">Desde</label><input type="date" id="reporteFacturacionesDesde" onchange="renderReporteFacturaciones()"></div>
+              <div><label style="font-size:12px;color:#6B6D74;display:block;margin-bottom:4px">Hasta</label><input type="date" id="reporteFacturacionesHasta" onchange="renderReporteFacturaciones()"></div>
               <div class="searchBox">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
                 <input type="text" id="reporteFacturacionesFiltro" placeholder="Filtrar por código o proveedor..." oninput="renderReporteFacturaciones()">
@@ -765,13 +842,18 @@
       <input type="file" id="pk-allocInput" accept=".csv" style="display:none" onchange="pkHandleAllocFile(this)">
       <div class="pk-spacer"></div>
       <select id="pk-filtroEstado" onchange="pkRenderDetalle()"><option value="">Todos los estados</option><option>Asignado</option><option>Cancelado</option><option>Finalizado</option></select>
-      <input type="text" id="pk-filtroSku" placeholder="Filtrar por SKU…" style="width:140px" oninput="pkRenderDetalle()">
-      <input type="text" id="pk-filtroProveedor" placeholder="Filtrar por proveedor…" style="width:180px" oninput="pkRenderDetalle()">
+      <input type="text" id="pk-filtroSku" placeholder="Filtrar por SKU…" style="width:140px" oninput="pkRenderDetalleDebounced()">
+      <input type="text" id="pk-filtroProveedor" placeholder="Filtrar por proveedor…" style="width:180px" oninput="pkRenderDetalleDebounced()">
       <button class="pk-btn pk-btnGhost">Exportar Excel</button>
     </div>
     <div id="pk-errors" style="display:none;background:var(--late-bg);color:var(--late-tx);border:1px solid #F0B8B4;border-radius:8px;padding:10px 14px;font-size:12.5px;margin-bottom:12px;"></div>
 
-    <div class="pk-card pk-scrollX">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+      <button class="pk-iconBtn" onclick="document.getElementById('pk-detalleScroll').scrollBy({left:-300,behavior:'smooth'})" title="Desplazar a la izquierda">◀</button>
+      <span style="font-size:11px;color:var(--faint)">Desplázate para ver todas las columnas</span>
+      <button class="pk-iconBtn" onclick="document.getElementById('pk-detalleScroll').scrollBy({left:300,behavior:'smooth'})" title="Desplazar a la derecha">▶</button>
+    </div>
+    <div class="pk-card pk-scrollX pk-detalleScroll" id="pk-detalleScroll">
       <table>
         <thead>
           <tr>
@@ -808,36 +890,40 @@
           Fechas <span id="pk-dateSummary">(todas)</span> ▾
         </button>
         <div class="pk-dateMenu" id="pk-dateMenu">
-          <div class="pk-dateMenuHead">Selecciona una o varias fechas con cita</div>
-          <div id="pk-dateMenuList" style="color:var(--faint);font-size:12px;padding:6px 4px;">Se llena al cargar los archivos y consultar citas.</div>
-          <div class="pk-dateMenuFoot">
-            <button class="pk-btnGhost pk-btn" onclick="pkTodasFechas()" style="flex:1">Todas</button>
-            <button class="pk-btnPrimary pk-btn" onclick="pkAplicarFechas()" style="flex:1">Aplicar</button>
+          <div class="pk-calHead">
+            <button class="pk-calNav" onclick="pkCalendarioCambiarMes(-1)">‹</button>
+            <span id="pk-calMesLabel">—</span>
+            <button class="pk-calNav" onclick="pkCalendarioCambiarMes(1)">›</button>
           </div>
+          <div class="pk-calQuick">
+            <button class="pk-calQuickBtn" onclick="pkCalendarioTodos()">Todos</button>
+            <button class="pk-calQuickBtn" onclick="pkCalendarioNinguno()">Ninguno</button>
+          </div>
+          <div class="pk-calGridHead"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+          <div class="pk-calGrid" id="pk-calGrid"></div>
+          <div class="pk-calFoot">Los días marcados en gris no tienen ninguna cita cargada.</div>
         </div>
       </div>
       <select id="pk-filtroTipoCita" onchange="pkAplicarFiltroTipo()"><option value="">Recojo + Facturación</option><option value="recojo">Solo recojo</option><option value="facturacion">Solo facturación</option></select>
       <div class="pk-spacer"></div>
-      <button class="pk-btnLink" onclick="pkToggleUbic()">
+      <button class="pk-btnLink" onclick="pkToggleUbic(this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
         Ver ubicaciones asociadas
       </button>
       <button class="pk-btn pk-btnPrimary" onclick="pkPrintAll()">🖶 Imprimir todas las hojas</button>
     </div>
 
-    <div id="pk-debug" class="pk-printOnlyHide" style="background:#FFF8E8;border:1px solid #F0DBA0;border-radius:8px;padding:12px 14px;font-size:11.5px;line-height:1.6;margin-bottom:16px;word-break:break-word;"></div>
-
-    <div class="pk-card pk-ubicPanel" id="pk-ubicPanel">
+    <div class="pk-ubicPanel" id="pk-ubicPanel">
       <div class="pk-ubicPanelHead">
         <div>
-          <h4>Ubicaciones a picar</h4>
-          <div class="pk-sub"><span id="pk-ubicCount">0</span> ubicaciones distintas · respeta el filtro de fecha y tipo de arriba</div>
+          <h4><span id="pk-ubicCount">0</span> ubicaciones a picar</h4>
+          <div class="pk-sub">según el filtro de fecha y tipo de arriba</div>
         </div>
-        <button class="pk-btn pk-btnGhost">Exportar Excel</button>
+        <button class="pk-btn pk-btnGhost" style="font-size:11px;padding:5px 9px" onclick="pkExportarUbicaciones()">Exportar Excel</button>
       </div>
       <div class="pk-scrollX">
         <table>
-          <thead><tr><th>Ubicación</th><th>Motivo</th><th>Proveedores</th><th class="pk-num">Tareas</th><th class="pk-num">Display</th></tr></thead>
+          <thead><tr><th>Ubicación</th><th>Motivo</th><th class="pk-num">Tareas</th><th class="pk-num">Display</th></tr></thead>
           <tbody id="pk-ubicBody"></tbody>
         </table>
       </div>
@@ -848,8 +934,6 @@
 
     <div class="pk-sectionLbl">Facturación</div>
     <div id="pk-facturacionList"><div style="color:var(--faint);font-size:12.5px;padding:8px 0">—</div></div>
-
-    <div id="pk-sheetsContainer"></div>
 
     <div class="pk-sectionLbl" style="display:flex;align-items:center;gap:8px;">
       ⚠ Sin cita · revisar
@@ -941,6 +1025,7 @@
 <!-- MODAL: crear usuario -->
 <div class="overlay" id="usuarioOverlay">
   <div class="modal">
+    <button class="modalCloseX" onclick="closeUsuarioModal()" aria-label="Cerrar">×</button>
     <h3>Crear usuario</h3>
     <div id="usuarioError" class="msg error" style="display:none"></div>
     <div id="usuarioSuccess" class="msg success" style="display:none"></div>
@@ -970,6 +1055,7 @@
 <!-- MODAL: editar usuario -->
 <div class="overlay" id="editarUsuarioOverlay">
   <div class="modal">
+    <button class="modalCloseX" onclick="closeEditarUsuarioModal()" aria-label="Cerrar">×</button>
     <h3>Editar usuario</h3>
     <div id="editarUsuarioError" class="msg error" style="display:none"></div>
     <div id="editarUsuarioSuccess" class="msg success" style="display:none"></div>
@@ -997,9 +1083,19 @@
   </div>
 </div>
 
+<!-- POPOVER: resumen de citas de un día (click en encabezado del calendario) -->
+<div id="diaResumenPopover" class="dayPopover">
+  <div class="dayPopoverHead">
+    <span id="diaResumenTitulo">Citas del día</span>
+    <button class="dayPopoverClose" onclick="closeDiaResumenModal()" aria-label="Cerrar">×</button>
+  </div>
+  <div id="diaResumenLista" class="dayPopoverList"></div>
+</div>
+
 <!-- MODAL: cita menu (click en fila ocupada) -->
 <div class="overlay" id="citaMenuOverlay">
   <div class="modal" style="max-width:280px">
+    <button class="modalCloseX" onclick="closeCitaMenuModal()" aria-label="Cerrar">×</button>
     <h3>¿Qué deseas hacer?</h3>
     <div style="display:flex;flex-direction:column;gap:6px">
       <button class="secondary" style="text-align:left" onclick="startEditarCita()">Editar / reagendar esta cita</button>
@@ -1015,6 +1111,7 @@
 <!-- MODAL: agendar/editar cita o facturación -->
 <div class="overlay" id="citaOverlay">
   <div class="modal">
+    <button class="modalCloseX" onclick="closeCitaModal()" aria-label="Cerrar">×</button>
     <h3 id="citaModalTitle">Nueva cita</h3>
     <div id="citaError" class="msg error" style="display:none"></div>
     <label>Proveedor</label>
@@ -1062,6 +1159,7 @@
 <!-- MODAL: manual add/edit -->
 <div class="overlay" id="manualOverlay">
   <div class="modal">
+    <button class="modalCloseX" onclick="closeManualModal()" aria-label="Cerrar">×</button>
     <h3 id="manualTitle">Agregar proveedor</h3>
     <div id="manualError" class="msg error" style="display:none"></div>
     <label>Código</label>
@@ -1082,6 +1180,7 @@
 <!-- MODAL: import -->
 <div class="overlay" id="importOverlay">
   <div class="modal" style="max-width:560px">
+    <button class="modalCloseX" onclick="closeImportModal()" aria-label="Cerrar">×</button>
     <h3>Importar plantilla de proveedores</h3>
     <div id="importError" class="msg error" style="display:none"></div>
 
@@ -1114,6 +1213,7 @@
 <!-- MODAL: import citas -->
 <div class="overlay" id="importCitasOverlay">
   <div class="modal" style="max-width:640px">
+    <button class="modalCloseX" onclick="closeImportCitasModal()" aria-label="Cerrar">×</button>
     <h3>Importar plantilla de citas</h3>
     <div id="importCitasError" class="msg error" style="display:none"></div>
 
@@ -1149,6 +1249,7 @@
 <!-- MODAL: change password -->
 <div class="overlay" id="passwordOverlay">
   <div class="modal">
+    <button class="modalCloseX" onclick="closePasswordModal()" aria-label="Cerrar">×</button>
     <h3>Cambiar contraseña</h3>
     <div id="passwordError" class="msg error" style="display:none"></div>
     <div id="passwordSuccess" class="msg success" style="display:none"></div>
@@ -1285,7 +1386,7 @@ function setActiveTab(id) {
   if (id === 'citas') cambiarVistaCitas('semana');
   if (id === 'reportes') mostrarSubreporte('citas');
   if (id === 'usuarios') cambiarVistaUsuarios('usuarios');
-  if (id === 'picking') { /* TODO: initPicking() cuando conectemos datos reales */ }
+  if (id === 'picking') { pkInitPicking(); }
 }
 function closeTab(id, e) {
   e.stopPropagation();
@@ -2092,6 +2193,13 @@ function mostrarSubreporte(nombre) {
     loadReporte();
   }
   if (nombre === 'facturaciones') {
+    if (!document.getElementById('reporteFacturacionesDesde').value) {
+      const monday = getMonday(todayStr());
+      const sunday = new Date(monday);
+      sunday.setDate(sunday.getDate() + 6);
+      document.getElementById('reporteFacturacionesDesde').value = fechaAISO(monday);
+      document.getElementById('reporteFacturacionesHasta').value = fechaAISO(sunday);
+    }
     loadReporteFacturaciones();
   }
 }
@@ -2109,8 +2217,16 @@ async function loadReporteFacturaciones() {
 function renderReporteFacturaciones() {
   const q = (document.getElementById('reporteFacturacionesFiltro').value || '').trim().toLowerCase();
   const estadoFiltro = document.getElementById('reporteFacturacionesEstado').value;
+  const desde = document.getElementById('reporteFacturacionesDesde').value;
+  const hasta = document.getElementById('reporteFacturacionesHasta').value;
   const lista = (window._reporteFacturacionesActual || []).filter(f => {
     if (estadoFiltro && f.estado !== estadoFiltro) return false;
+    if (desde || hasta) {
+      const fechaReg = f.creado_en ? f.creado_en.slice(0, 10) : null;
+      if (!fechaReg) return false;
+      if (desde && fechaReg < desde) return false;
+      if (hasta && fechaReg > hasta) return false;
+    }
     if (!q) return true;
     const nombre = (f.proveedores ? f.proveedores.descripcion : '').toLowerCase();
     return f.codigo_proveedor.toLowerCase().includes(q) || nombre.includes(q);
@@ -2293,7 +2409,12 @@ async function loadFacturacionesPendientes() {
     .order('creado_en');
   if (error) { return; }
 
-  const lista = data || [];
+  const q = (document.getElementById('facturacionesPendientesFiltro')?.value || '').trim().toLowerCase();
+  const lista = (data || []).filter(f => {
+    if (!q) return true;
+    const nombre = (f.proveedores ? f.proveedores.descripcion : '').toLowerCase();
+    return (f.codigo_proveedor || '').toLowerCase().includes(q) || nombre.includes(q);
+  });
   cont.innerHTML = "";
   if (lista.length === 0) { empty.style.display = 'block'; return; }
   empty.style.display = 'none';
@@ -2322,12 +2443,58 @@ async function loadFacturacionesPendientes() {
   });
 }
 
+function mostrarCitasDelDia(fechaISO, anchorEl) {
+  const citasDelDia = citasSemanaActual
+    .filter(c => c.fecha === fechaISO)
+    .sort((a, b) => (a.hora_inicio || '').localeCompare(b.hora_inicio || ''));
+
+  const fechaObj = new Date(fechaISO + 'T00:00:00');
+  document.getElementById('diaResumenTitulo').textContent =
+    fechaObj.toLocaleDateString('es-PE', { weekday: 'short', day: 'numeric', month: 'short' });
+
+  const cont = document.getElementById('diaResumenLista');
+  if (!citasDelDia.length) {
+    cont.innerHTML = '<p style="font-size:11px;color:#8A8F9C;padding:8px">No hay citas este día.</p>';
+  } else {
+    cont.innerHTML = citasDelDia.map(c => {
+      const nombre = c.proveedores ? c.proveedores.descripcion : c.codigo_proveedor;
+      const hora = (c.hora_inicio || '').slice(0, 5) + (c.hora_fin ? '-' + c.hora_fin.slice(0, 5) : '');
+      return '<div class="dayPopoverRow"><span class="prov">' + nombre + '</span><span class="hora">' + hora + '</span></div>';
+    }).join('');
+  }
+
+  const pop = document.getElementById('diaResumenPopover');
+  pop.classList.add('show');
+  if (anchorEl) {
+    const r = anchorEl.getBoundingClientRect();
+    let left = r.left;
+    const maxLeft = window.innerWidth - 350;
+    if (left > maxLeft) left = maxLeft;
+    pop.style.top = (r.bottom + 4) + 'px';
+    pop.style.left = Math.max(8, left) + 'px';
+  }
+}
+function closeDiaResumenModal() {
+  document.getElementById('diaResumenPopover').classList.remove('show');
+}
+document.addEventListener('click', function(e){
+  const pop = document.getElementById('diaResumenPopover');
+  if (pop && pop.classList.contains('show') && !e.target.closest('.dayPopover') && !e.target.closest('#semanaTable th')) {
+    pop.classList.remove('show');
+  }
+});
+
+let citasSemanaActual = [];
+let diasSemanaActual = [];
+
 function renderSemana(diasSemana, citas) {
   const franjas = generarFranjas();
   const nombresDia = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
+  citasSemanaActual = citas;
+  diasSemanaActual = diasSemana;
 
   const headRow = document.getElementById('semanaHeadRow');
-  headRow.innerHTML = '<th></th>' + diasSemana.map((d,i) => `<th>${nombresDia[i]} ${d.getDate()}</th>`).join('');
+  headRow.innerHTML = '<th></th>' + diasSemana.map((d,i) => `<th style="cursor:pointer" onclick="mostrarCitasDelDia('${fechaAISO(d)}', this)" title="Ver todas las citas de este día">${nombresDia[i]} ${d.getDate()}</th>`).join('');
 
   const body = document.getElementById('semanaBody');
   body.innerHTML = "";
@@ -3138,7 +3305,48 @@ let pkSinCita = [];
 let pkCompletados = [];
 let pkIgnorados = new Set();
 let pkGrupoActual = {};
-let pkFechasSeleccionadas = null; // null = todas. Set(['2026-08-12', ...]) = filtro activo
+let pkFechasSeleccionadas = undefined; // undefined = aún no inicializado (se pone en "hoy" la primera vez). null = todas.
+let pkPickingInicializado = false;
+let pkUbicacionesActuales = [];
+
+async function pkInitPicking(){
+  if (pkPickingInicializado) return;
+  pkPickingInicializado = true;
+
+  if (!pkOlasRows.length) {
+    document.getElementById('pk-olasLabel').innerHTML = 'Buscando datos guardados…';
+    const { data, error } = await sb.from('olas_picking').select('*');
+    if (!error && data && data.length) {
+      // Mapeamos de vuelta al formato de columnas del Excel, para reusar el mismo cruce
+      pkOlasRows = data.map(r => ({
+        'PROVEEDOR': r.proveedor,
+        'COD. PROV': r.cod_prov,
+        'FECHA ORDEN': r.fecha_orden,
+        'REPORTE': r.reporte,
+        'MOTIVO': r.motivo,
+        'ORDEN': r.orden,
+        'ESTADO ORDEN': r.estado_orden,
+        'CANT. SOL.': r.cant_sol,
+        'CANT. ASIG.': r.cant_asig,
+        'CANT. EMP.': r.cant_emp,
+        'OLA': r.ola
+      }));
+      document.getElementById('pk-olasLabel').innerHTML = '✓ <b>' + pkOlasRows.length + ' órdenes</b> (última carga guardada) — sube un archivo nuevo para actualizar';
+    } else {
+      document.getElementById('pk-olasLabel').innerHTML = '⬆ Subir <b>OLAS_PICKING.xlsx</b>';
+    }
+  }
+
+  if (!pkAllocRows.length) {
+    const cache = pkCargarAllocLocal();
+    if (cache && cache.rows && cache.rows.length) {
+      pkAllocRows = cache.rows;
+      document.getElementById('pk-allocLabel').innerHTML = '✓ <b>' + (cache.filename || 'Allocation') + '</b> — ' + pkAllocRows.length + ' líneas (guardado en este equipo) — sube uno nuevo para actualizar';
+    }
+  }
+
+  pkTryCruzar();
+}
 
 function pkShowError(msg){
   const box = document.getElementById('pk-errors');
@@ -3214,6 +3422,7 @@ async function pkHandleAllocFile(input){
     pkValidateColumns(rows, PK_ALLOC_COLS, 'Allocation.csv');
     pkAllocRows = rows;
     document.getElementById('pk-allocLabel').innerHTML = '✓ <b>' + file.name + '</b> — ' + rows.length + ' líneas';
+    pkGuardarAllocLocal(rows, file.name);
     pkTryCruzar();
   } catch (err) {
     document.getElementById('pk-allocLabel').innerHTML = '⬆ Subir <b>Allocation.csv</b>';
@@ -3221,10 +3430,36 @@ async function pkHandleAllocFile(input){
   }
 }
 
+// Guardamos Allocation en el navegador de quien lo cargó (localStorage), para que si
+// cierra y vuelve a abrir la página, no tenga que subir el archivo de nuevo — solo cuando
+// suba uno nuevo se reemplaza. Es local a ese navegador/equipo, no se comparte con nadie más.
+const PK_ALLOC_STORAGE_KEY = 'pk_allocation_cache_v1';
+function pkGuardarAllocLocal(rows, filename){
+  try {
+    localStorage.setItem(PK_ALLOC_STORAGE_KEY, JSON.stringify({ filename, rows, guardadoEn: new Date().toISOString() }));
+  } catch (e) {
+    console.warn('[Picking] No se pudo guardar Allocation localmente (posiblemente el archivo es muy grande para localStorage):', e);
+  }
+}
+function pkCargarAllocLocal(){
+  try {
+    const raw = localStorage.getItem(PK_ALLOC_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+
 function pkNormalizaCodigo(v){
   let s = String(v ?? '').trim();
   s = s.replace(/\.0$/, ''); // por si Excel lo dejó como número "20517758991.0"
   return s;
+}
+
+// Tu tabla proveedores/citas guarda el código de proveedor con 1 dígito menos que el RUC
+// completo de OLAS_PICKING (ej. OLAS: 20525006728 → guardado: 2052500672). Comparamos
+// truncando el RUC a 10 dígitos cuando tiene 11, para que sí matcheen.
+function pkCodigoParaCita(codigo){
+  const s = pkNormalizaCodigo(codigo);
+  return s.length === 11 ? s.slice(0, -1) : s;
 }
 
 function pkTryCruzar(){
@@ -3237,7 +3472,8 @@ function pkTryCruzar(){
     olasMap[orden] = {
       proveedor: r['PROVEEDOR'],
       codProv: pkNormalizaCodigo(r['COD. PROV']),
-      motivo: r['MOTIVO']
+      motivo: r['MOTIVO'],
+      ola: r['OLA']
     };
   });
 
@@ -3262,12 +3498,19 @@ function pkTryCruzar(){
       proveedor: cruce ? cruce.proveedor : '(sin match en OLAS)',
       codProveedor: cruce ? cruce.codProv : null,
       motivo: cruce ? cruce.motivo : '(sin match en OLAS)',
+      ola: cruce ? cruce.ola : null,
       displays: Math.round(Number(r['Cant Asig Displays']) || 0)
     };
   });
 
   pkRenderDetalle();
   pkLoadCitasYReporte();
+}
+
+let pkDetalleDebounceTimer = null;
+function pkRenderDetalleDebounced(){
+  clearTimeout(pkDetalleDebounceTimer);
+  pkDetalleDebounceTimer = setTimeout(pkRenderDetalle, 280);
 }
 
 function pkRenderDetalle(){
@@ -3314,23 +3557,6 @@ function pkRenderDetalle(){
   tbody.innerHTML = rowsHtml + '<tr class="pk-totRow"><td colspan="16">Total — ' + filtradas.length + ' líneas</td><td class="pk-num">' + totalDisplays + '</td></tr>';
 }
 
-async function pkRenderDebug(codigosBuscados, citasEncontradas){
-  const box = document.getElementById('pk-debug');
-  if (!box) return;
-
-  // Muestra real de tu tabla citas, sin filtro, para comparar formato de codigo_proveedor
-  const { data: muestra } = await sb.from('citas').select('codigo_proveedor, fecha, tipo').limit(8);
-
-  const buscadosHtml = codigosBuscados.slice(0, 15).map(c => '<code>' + c + '</code> (' + typeof c + ')').join(', ');
-  const muestraHtml = (muestra || []).map(c => '<code>' + c.codigo_proveedor + '</code> (' + typeof c.codigo_proveedor + ')').join(', ') || 'tu tabla citas está vacía o no se pudo leer';
-
-  box.innerHTML =
-    '<div style="font-weight:700;margin-bottom:6px">🔧 Diagnóstico de cruce con citas</div>' +
-    '<div><b>Códigos que busqué</b> (los que salen de OLAS_PICKING, primeros 15): ' + buscadosHtml + '</div>' +
-    '<div style="margin-top:6px"><b>Citas que encontré con esos códigos:</b> ' + citasEncontradas.length + '</div>' +
-    '<div style="margin-top:6px"><b>Muestra real de tu tabla citas</b> (sin filtrar, primeras 8 filas): ' + muestraHtml + '</div>' +
-    '<div style="margin-top:8px;color:var(--muted)">Compara el formato: si "Códigos que busqué" se ve distinto a "codigo_proveedor" en la muestra (espacios, ceros a la izquierda, texto vs. número), ahí está el problema.</div>';
-}
 
 async function pkLoadCitasYReporte(){
   const asignados = pkDetalle.filter(d => d.estado === 'Asignado' && d.codProveedor);
@@ -3354,19 +3580,33 @@ async function pkLoadCitasYReporte(){
   // Consultamos citas para TODOS los proveedores que aparecen en la carga (no solo los con pendientes),
   // así podemos distinguir "sin cita" de "ya completado, sí tenía cita".
   const todosCodigos = [...new Set(pkDetalle.map(d => d.codProveedor).filter(Boolean))];
+
+  // Mapa: código truncado (como está en tu tabla) -> lista de códigos completos (RUC de OLAS) que le corresponden
+  const truncadoAOriginal = {};
+  todosCodigos.forEach(cod => {
+    const trunc = pkCodigoParaCita(cod);
+    if (!truncadoAOriginal[trunc]) truncadoAOriginal[trunc] = [];
+    truncadoAOriginal[trunc].push(cod);
+  });
+  const codigosTruncados = Object.keys(truncadoAOriginal);
+
   pkCitasPorProveedor = {};
-  if (todosCodigos.length) {
+  if (codigosTruncados.length) {
     const { data: citas, error } = await sb.from('citas')
       .select('id, codigo_proveedor, fecha, hora_inicio, hora_fin, tipo, estado')
-      .in('codigo_proveedor', todosCodigos);
+      .in('codigo_proveedor', codigosTruncados);
     if (error) { pkShowError('No se pudo leer citas: ' + error.message); return; }
     (citas || []).forEach(c => {
-      const key = pkNormalizaCodigo(c.codigo_proveedor);
-      if (!pkCitasPorProveedor[key]) pkCitasPorProveedor[key] = [];
-      pkCitasPorProveedor[key].push(c);
+      const truncKey = pkNormalizaCodigo(c.codigo_proveedor);
+      const originales = truncadoAOriginal[truncKey] || [];
+      originales.forEach(codOriginal => {
+        if (!pkCitasPorProveedor[codOriginal]) pkCitasPorProveedor[codOriginal] = [];
+        pkCitasPorProveedor[codOriginal].push(c);
+      });
     });
-    await pkRenderDebug(todosCodigos, citas || []);
   }
+
+  pkInicializarFiltroFechasSiHaceFalta();
 
   const porProveedor = {};
   asignados.forEach(d => {
@@ -3406,13 +3646,10 @@ function pkUrgencia(fecha, horaInicio){
 function pkTicketHtml(g, c){
   const urg = pkUrgencia(c.fecha, c.hora_inicio);
   const badge = urg === 'late' ? 'Vencida' : (urg === 'warn' ? 'Próxima' : 'A tiempo');
-  const horaTxt = c.tipo === 'facturacion' ? c.fecha : (c.fecha + ' · ' + (c.hora_inicio || '').slice(0, 5));
   return '<div class="pk-ticket pk-' + urg + ' pk-printOnlyHide" onclick="pkToggleSheet(\'pk-sheet-' + c.id + '\')">'
     + '<div class="pk-ticketBar"></div>'
     + '<div class="pk-ticketBody">'
-    + '<div class="pk-ticketProv"><div class="pk-name">' + g.proveedor + '</div><div class="pk-code">' + g.codProveedor + ' · ' + horaTxt + '</div>'
-    + (g.estadoResumen ? '<div style="font-size:10.5px;color:var(--faint);margin-top:2px">' + g.estadoResumen + '</div>' : '')
-    + '</div>'
+    + '<div class="pk-ticketProv"><div class="pk-name">' + g.proveedor + '</div><div class="pk-code">' + c.fecha + '</div></div>'
     + '<span class="pk-badge">' + badge + '</span>'
     + '<div class="pk-metric"><div class="pk-v">' + g.tareas.size + '</div><div class="pk-l">Tareas</div></div>'
     + '<div class="pk-metric"><div class="pk-v">' + g.ubicaciones.size + '</div><div class="pk-l">Ubicaciones</div></div>'
@@ -3422,20 +3659,94 @@ function pkTicketHtml(g, c){
 }
 
 function pkSheetHtml(g, c){
-  const filasHtml = g.filas.map(f =>
-    '<tr><td class="pk-code">' + (f.nroTarea || '') + '</td><td>' + (f.tipoAsignacion || '') + '</td><td class="pk-code">' + (f.ubicacion || '') + '</td><td class="pk-motivo">' + (f.motivo || '') + '</td><td class="pk-num">' + f.displays + '</td></tr>'
-  ).join('');
+  // Consolidamos por Nro. de Tarea: Tipo y Motivo son únicos por tarea (no se repiten por línea).
+  // Dentro de cada tarea, consolidamos también por Ubicación distinta (sumando el Display de
+  // todas las líneas que caen en la misma ubicación), en vez de repetir la ubicación por cada línea.
+  const porTarea = {};
+  const ordenTareas = [];
+  g.filas.forEach(f => {
+    const key = f.nroTarea || '(sin tarea)';
+    if (!porTarea[key]) { porTarea[key] = { tipo: f.tipoAsignacion, motivo: f.motivo, ola: f.ola, ubicMap: {}, ordenUbic: [] }; ordenTareas.push(key); }
+    const t = porTarea[key];
+    const ubicKey = f.ubicacion || '—';
+    if (!(ubicKey in t.ubicMap)) { t.ubicMap[ubicKey] = 0; t.ordenUbic.push(ubicKey); }
+    t.ubicMap[ubicKey] += f.displays;
+  });
+
+  const tareasHtml = ordenTareas.map(nroTarea => {
+    const grupo = porTarea[nroTarea];
+    const ubicaciones = grupo.ordenUbic.map(u => ({ ubicacion: u, displays: Math.round(grupo.ubicMap[u] * 100) / 100 }));
+    const nUbic = ubicaciones.length;
+    const soloUna = nUbic === 1;
+    const ubicHtml = ubicaciones.map(u => '<div class="pk-taskUbicLine"><span class="pk-code">' + u.ubicacion + '</span><span class="pk-num">' + u.displays + '</span></div>').join('');
+
+    return '<div class="pk-taskBlock">'
+      + '<div class="pk-taskTopRow">'
+      + '<span class="pk-taskUbicHead">' + (soloUna ? '1 ubicación a picar' : nUbic + ' ubicaciones a picar') + '</span>'
+      + (grupo.tipo ? '<span class="pk-taskTipo">' + grupo.tipo + '</span>' : '')
+      + (grupo.motivo ? '<span class="pk-motivo">' + grupo.motivo + '</span>' : '')
+      + (grupo.ola ? '<span class="pk-taskOla">' + grupo.ola + '</span>' : '')
+      + '</div>'
+      + '<div class="pk-taskBody">'
+      + '<div class="pk-taskLeft">'
+      + '<div class="pk-taskBarcode" data-barcode="' + nroTarea + '"><span class="pk-barcodePending">generando…</span></div>'
+      + '<div class="pk-taskNro">' + nroTarea + '</div>'
+      + '</div>'
+      + '<div class="pk-taskRight">' + ubicHtml + '</div>'
+      + '</div></div>';
+  }).join('');
+
   return '<div class="pk-card pk-sheet" id="pk-sheet-' + c.id + '">'
     + '<div style="padding:16px 18px;">'
     + '<div class="pk-sheetHead"><div><h3>Hoja de picking — ' + g.proveedor + '</h3><div class="pk-sub">Cod. ' + g.codProveedor + '</div></div>'
     + '<button class="pk-btn pk-btnPrimary pk-printOnlyHide" onclick="window.print()">Imprimir hoja</button></div>'
-    + '<table><thead><tr><th>Nro. tarea</th><th>Tipo</th><th>Ubicación</th><th>Motivo</th><th class="pk-num">Display</th></tr></thead><tbody>' + filasHtml + '</tbody></table>'
+    + '<div class="pk-taskGrid">' + tareasHtml + '</div>'
     + '<div class="pk-sheetMeta"><div><div class="pk-lbl">Responsable</div>—</div><div><div class="pk-lbl">Fecha de cita</div>' + c.fecha + ' ' + (c.hora_inicio || '').slice(0, 5) + '</div></div>'
     + '</div></div>';
 }
 
+// Genera los códigos de barra SOLO dentro de un contenedor puntual (una hoja),
+// y solo una vez por elemento — así no se calculan cientos de códigos de golpe
+// en cada render del reporte, que era lo que hacía lenta la pantalla/impresión.
+// Si algo falla, deja un aviso visible en vez de una caja en blanco sin explicación.
+function pkRenderBarcodesIn(container){
+  if (!container) return;
+  const cajas = container.querySelectorAll('.pk-taskBarcode[data-barcode]');
+  if (typeof JsBarcode === 'undefined') {
+    console.error('[Picking] JsBarcode no está disponible — revisa que el <script> de JsBarcode haya cargado (ver consola/Network para un 404 o bloqueo).');
+    cajas.forEach(el => { el.innerHTML = '<span class="pk-barcodeError">⚠ librería de código de barras no cargó</span>'; });
+    return;
+  }
+  cajas.forEach(el => {
+    if (el.dataset.rendered) return;
+    const valor = el.dataset.barcode;
+    if (!valor) return;
+    try {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      JsBarcode(svg, valor, { format: 'CODE128', displayValue: false, margin: 0, width: 1.6, height: 44 });
+      el.innerHTML = '';
+      el.appendChild(svg);
+      el.dataset.rendered = '1';
+    } catch (e) {
+      console.error('[Picking] Error generando código de barras para "' + valor + '":', e);
+      el.innerHTML = '<span class="pk-barcodeError">⚠ ' + valor + '</span>';
+    }
+  });
+}
+
 function pkFechaAplica(fecha){
-  return pkFechasSeleccionadas === null || pkFechasSeleccionadas.has(fecha);
+  if (pkFechasSeleccionadas === undefined || pkFechasSeleccionadas === null) return true;
+  return pkFechasSeleccionadas.has(fecha);
+}
+
+// La primera vez que hay citas cargadas, el filtro arranca mostrando SOLO el día de hoy
+// (si hay citas hoy); después de eso, se respeta lo que la persona vaya eligiendo.
+function pkInicializarFiltroFechasSiHaceFalta(){
+  if (pkFechasSeleccionadas !== undefined) return; // ya se inicializó antes, no lo pisamos
+  const fechas = new Set();
+  Object.values(pkCitasPorProveedor).forEach(list => list.forEach(c => fechas.add(c.fecha)));
+  const hoy = new Date().toISOString().slice(0, 10);
+  pkFechasSeleccionadas = fechas.has(hoy) ? new Set([hoy]) : null;
 }
 
 function pkAplicarFiltroTipo(){
@@ -3446,22 +3757,23 @@ function pkAplicarFiltroTipo(){
 
 function pkRenderReporte(porProveedor){
   const filtroTipo = document.getElementById('pk-filtroTipoCita').value;
-  const recojoHtml = [], facturacionHtml = [], sheetsHtml = [];
+  const recojoHtml = [], facturacionHtml = [];
 
   Object.values(porProveedor).forEach(g => {
     const citasProv = pkCitasPorProveedor[g.codProveedor] || [];
     citasProv.forEach(c => {
       if (filtroTipo && c.tipo !== filtroTipo) return;
       if (!pkFechaAplica(c.fecha)) return;
-      sheetsHtml.push(pkSheetHtml(g, c));
-      const ticket = pkTicketHtml(g, c);
-      if (c.tipo === 'facturacion') facturacionHtml.push(ticket); else recojoHtml.push(ticket);
+      // La hoja va pegada justo debajo de su tarjeta, no en una sección aparte
+      const bloque = pkTicketHtml(g, c) + pkSheetHtml(g, c);
+      if (c.tipo === 'facturacion') facturacionHtml.push(bloque); else recojoHtml.push(bloque);
     });
   });
 
   document.getElementById('pk-recojoList').innerHTML = recojoHtml.join('') || '<div style="color:var(--faint);font-size:12.5px;padding:8px 0">No hay tareas de recojo con cita en el filtro actual.</div>';
   document.getElementById('pk-facturacionList').innerHTML = facturacionHtml.join('') || '<div style="color:var(--faint);font-size:12.5px;padding:8px 0">No hay facturaciones con cita en el filtro actual.</div>';
-  document.getElementById('pk-sheetsContainer').innerHTML = sheetsHtml.join('');
+  // Los códigos de barra se generan al abrir cada hoja o al imprimir (ver pkToggleSheet / pkPrintAll),
+  // no aquí, para no recalcular cientos de códigos en cada cambio de filtro.
 
   document.getElementById('pk-warnCount').textContent = pkSinCita.length;
   document.getElementById('pk-sinCitaBody').innerHTML = pkSinCita.map(g =>
@@ -3485,56 +3797,100 @@ function pkRenderUbicaciones(asignados){
     const citasProv = pkCitasPorProveedor[d.codProveedor] || [];
     const citasQueAplican = citasProv.filter(c => (!filtroTipo || c.tipo === filtroTipo) && pkFechaAplica(c.fecha));
     if (!citasQueAplican.length) return;
-    const key = (d.ubicacion || '—') + '|' + d.motivo;
-    if (!map[key]) map[key] = { ubicacion: d.ubicacion || '—', motivo: d.motivo, proveedores: new Set(), tareas: new Set(), displays: 0 };
-    map[key].proveedores.add(d.proveedor);
+    const key = d.ubicacion || '—'; // una ubicación siempre tiene un único motivo
+    if (!map[key]) map[key] = { ubicacion: d.ubicacion || '—', motivo: d.motivo, tareas: new Set(), displays: 0 };
     map[key].tareas.add(d.nroTarea);
     map[key].displays += d.displays;
   });
-  const rows = Object.values(map);
+  const rows = Object.values(map).sort((a, b) => a.ubicacion.localeCompare(b.ubicacion));
+  pkUbicacionesActuales = rows;
   document.getElementById('pk-ubicCount').textContent = rows.length;
   document.getElementById('pk-ubicBody').innerHTML = rows.map(r =>
-    '<tr><td class="pk-code">' + r.ubicacion + '</td><td class="pk-motivo">' + r.motivo + '</td><td>' + [...r.proveedores].join(', ') + '</td><td class="pk-num">' + r.tareas.size + '</td><td class="pk-num">' + r.displays + '</td></tr>'
+    '<tr><td class="pk-code">' + r.ubicacion + '</td><td class="pk-motivo">' + r.motivo + '</td><td class="pk-num">' + r.tareas.size + '</td><td class="pk-num">' + (Math.round(r.displays * 100) / 100) + '</td></tr>'
   ).join('');
 }
 
-function pkRenderDateMenu(){
+let pkCalMesActual = null; // Date (día 1) del mes que se muestra en el mini calendario
+
+function pkFechasConCita(){
   const fechas = new Set();
-  Object.values(pkCitasPorProveedor).forEach(list => list.forEach(c => fechas.add(c.fecha)));
-  const el = document.getElementById('pk-dateMenuList');
-  if (!fechas.size) { el.innerHTML = 'No hay citas para los proveedores cargados.'; pkActualizarResumenFechas(fechas); return; }
-  el.innerHTML = [...fechas].sort().map(f => {
-    const marcado = pkFechasSeleccionadas === null || pkFechasSeleccionadas.has(f);
-    return '<label><input type="checkbox" value="' + f + '" ' + (marcado ? 'checked' : '') + '> ' + f + '</label>';
-  }).join('');
-  pkActualizarResumenFechas(fechas);
+  Object.values(pkCitasPorProveedor).forEach(list => list.forEach(c => { if (c.fecha) fechas.add(c.fecha); }));
+  return fechas;
+}
+
+function pkRenderDateMenu(){
+  if (!pkCalMesActual) {
+    pkCalMesActual = new Date();
+    pkCalMesActual.setDate(1);
+  }
+  pkRenderCalendarioGrid();
+  pkActualizarResumenFechas(pkFechasConCita());
+}
+
+function pkCalendarioCambiarMes(delta){
+  pkCalMesActual.setMonth(pkCalMesActual.getMonth() + delta);
+  pkRenderCalendarioGrid();
+}
+
+function pkRenderCalendarioGrid(){
+  const grid = document.getElementById('pk-calGrid');
+  const label = document.getElementById('pk-calMesLabel');
+  if (!grid || !label || !pkCalMesActual) return;
+  const fechasConCita = pkFechasConCita();
+  const year = pkCalMesActual.getFullYear();
+  const month = pkCalMesActual.getMonth();
+  label.textContent = pkCalMesActual.toLocaleDateString('es-PE', { month: 'long', year: 'numeric' });
+
+  const ultimoDia = new Date(year, month + 1, 0);
+  let inicioSemana = new Date(year, month, 1).getDay();
+  inicioSemana = inicioSemana === 0 ? 6 : inicioSemana - 1; // lunes = 0
+
+  let html = '';
+  for (let i = 0; i < inicioSemana; i++) html += '<span></span>';
+  for (let d = 1; d <= ultimoDia.getDate(); d++) {
+    const fechaISO = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    const tieneCita = fechasConCita.has(fechaISO);
+    const marcado = tieneCita && (pkFechasSeleccionadas === null || pkFechasSeleccionadas === undefined || pkFechasSeleccionadas.has(fechaISO));
+    const clases = tieneCita ? 'pk-calConCita' + (marcado ? ' pk-calMarcado' : '') : 'pk-calSinCita';
+    html += tieneCita
+      ? '<span class="' + clases + '" onclick="pkCalendarioClickDia(\'' + fechaISO + '\')">' + d + '</span>'
+      : '<span class="' + clases + '">' + d + '</span>';
+  }
+  grid.innerHTML = html;
+}
+
+function pkCalendarioClickDia(fechaISO){
+  if (pkFechasSeleccionadas === null || pkFechasSeleccionadas === undefined) {
+    pkFechasSeleccionadas = new Set(pkFechasConCita());
+  }
+  if (pkFechasSeleccionadas.has(fechaISO)) pkFechasSeleccionadas.delete(fechaISO);
+  else pkFechasSeleccionadas.add(fechaISO);
+  pkAplicarFiltroFechaEnVivo();
+}
+
+function pkCalendarioTodos(){
+  pkFechasSeleccionadas = null;
+  pkAplicarFiltroFechaEnVivo();
+}
+function pkCalendarioNinguno(){
+  pkFechasSeleccionadas = new Set();
+  pkAplicarFiltroFechaEnVivo();
+}
+
+// El filtro se aplica al instante con cada clic — no hace falta botón "Aplicar" ni cerrar el calendario.
+function pkAplicarFiltroFechaEnVivo(){
+  pkRenderCalendarioGrid();
+  pkActualizarResumenFechas(pkFechasConCita());
+  pkRenderReporte(pkGrupoActual);
+  const asignados = pkDetalle.filter(d => d.estado === 'Asignado' && d.codProveedor);
+  pkRenderUbicaciones(asignados);
 }
 
 function pkActualizarResumenFechas(todasLasFechas){
   const total = todasLasFechas.size;
-  const seleccionadas = pkFechasSeleccionadas === null ? total : pkFechasSeleccionadas.size;
+  const seleccionadas = (pkFechasSeleccionadas === null || pkFechasSeleccionadas === undefined) ? total : pkFechasSeleccionadas.size;
   document.getElementById('pk-dateSummary').textContent =
-    pkFechasSeleccionadas === null ? '(todas — ' + total + ')' : '(' + seleccionadas + ' de ' + total + ')';
-}
-
-function pkTodasFechas(){
-  pkFechasSeleccionadas = null;
-  document.getElementById('pk-dateMenu').classList.remove('show');
-  pkRenderDateMenu();
-  pkRenderReporte(pkGrupoActual);
-  const asignados = pkDetalle.filter(d => d.estado === 'Asignado' && d.codProveedor);
-  pkRenderUbicaciones(asignados);
-}
-
-function pkAplicarFechas(){
-  const checks = document.querySelectorAll('#pk-dateMenuList input[type=checkbox]');
-  const seleccion = new Set([...checks].filter(c => c.checked).map(c => c.value));
-  pkFechasSeleccionadas = seleccion; // set vacío = ninguna fecha, se respeta tal cual
-  document.getElementById('pk-dateMenu').classList.remove('show');
-  pkRenderDateMenu();
-  pkRenderReporte(pkGrupoActual);
-  const asignados = pkDetalle.filter(d => d.estado === 'Asignado' && d.codProveedor);
-  pkRenderUbicaciones(asignados);
+    (pkFechasSeleccionadas === null || pkFechasSeleccionadas === undefined) ? '(todas — ' + total + ')' : '(' + seleccionadas + ' de ' + total + ')';
 }
 
 function pkParseFecha(value){
@@ -3611,22 +3967,48 @@ function pkShowTab(id, btn){
 }
 function pkToggleSheet(id){
   const el = document.getElementById(id);
-  if (el) el.classList.toggle('show');
+  if (!el) return;
+  el.classList.toggle('show');
+  if (el.classList.contains('show')) pkRenderBarcodesIn(el);
 }
-function pkToggleUbic(){
-  document.getElementById('pk-ubicPanel').classList.toggle('show');
+function pkToggleUbic(btn){
+  const panel = document.getElementById('pk-ubicPanel');
+  const willShow = !panel.classList.contains('show');
+  panel.classList.toggle('show');
+  if (willShow && btn) {
+    const r = btn.getBoundingClientRect();
+    let left = r.left;
+    const maxLeft = window.innerWidth - 440;
+    if (left > maxLeft) left = maxLeft;
+    panel.style.top = (r.bottom + 4) + 'px';
+    panel.style.left = Math.max(8, left) + 'px';
+  }
+}
+function pkExportarUbicaciones(){
+  if (!pkUbicacionesActuales.length) { alert('No hay ubicaciones para exportar con el filtro actual.'); return; }
+  const filas = pkUbicacionesActuales.map(r => ({
+    Ubicacion: r.ubicacion, Motivo: r.motivo, Tareas: r.tareas.size, Display: r.displays
+  }));
+  const ws = XLSX.utils.json_to_sheet(filas);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Ubicaciones');
+  XLSX.writeFile(wb, 'ubicaciones_a_picar.xlsx');
 }
 function pkToggleDateMenu(){
   document.getElementById('pk-dateMenu').classList.toggle('show');
 }
 function pkPrintAll(){
-  document.querySelectorAll('.pk-sheet').forEach(s => s.classList.add('show'));
+  document.querySelectorAll('.pk-sheet').forEach(s => { s.classList.add('show'); pkRenderBarcodesIn(s); });
   window.print();
 }
 document.addEventListener('click', function(e){
   const menu = document.getElementById('pk-dateMenu');
   if (menu && menu.classList.contains('show') && !e.target.closest('.pk-dateMenu') && !e.target.closest('.pk-btnLink')) {
     menu.classList.remove('show');
+  }
+  const ubic = document.getElementById('pk-ubicPanel');
+  if (ubic && ubic.classList.contains('show') && !e.target.closest('.pk-ubicPanel') && !e.target.closest('.pk-btnLink')) {
+    ubic.classList.remove('show');
   }
 });
 
