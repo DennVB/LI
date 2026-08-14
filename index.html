@@ -112,7 +112,7 @@
   }
   .tabItem .closeX:hover { color: #B33A3A; }
 
-  .wrap { max-width: 980px; margin: 24px auto; padding: 0 16px; }
+  .wrap { max-width: 1280px; margin: 24px auto; padding: 0 16px; }
   .section { display: none; }
   .section.active { display: block; }
 
@@ -221,6 +221,13 @@
   .dayPopoverRow:hover { background: #FAFBFC; }
   .dayPopoverRow .prov { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .dayPopoverRow .hora { color: #6B6D74; white-space: nowrap; flex-shrink: 0; }
+  .dayPopoverPicking { display: flex; flex-direction: column; gap: 2px; margin-top: 1px; }
+  .dayPopoverPickingLbl { font-size: 10px; color: #6B6D74; }
+  .dayPopoverPickingTrack { width: 100%; height: 4px; background: #EEF0F3; border-radius: 3px; overflow: hidden; }
+  .dayPopoverPickingFill { height: 100%; border-radius: 3px; }
+  .dayPopoverPickingFill-Picado { background: #639922; }
+  .dayPopoverPickingFill-Picadoparcial { background: #C98A00; }
+  .dayPopoverPickingFill-Sinpicar { background: #E86363; }
   .modal h3 { margin: 0 0 14px; font-size: 16px; }
   .modal label { font-size: 12px; color: #666; display: block; margin-bottom: 4px; margin-top: 10px; }
   .modal input, .modal select {
@@ -229,6 +236,25 @@
   .modal .actions { display: flex; gap: 8px; margin-top: 18px; justify-content: flex-end; }
   .checkbox-row { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
   .checkbox-row input { width: auto; }
+
+  .dynSection { border: 1px solid #E8E9ED; border-radius: 8px; padding: 8px; margin-top: 6px; background: #FAFBFC; }
+  .dynSection:empty { display: none; }
+  .dynRow { display: flex; gap: 6px; margin-bottom: 6px; align-items: center; }
+  .dynRow:last-child { margin-bottom: 0; }
+  .dynRow input { flex: 1; font-size: 12.5px; padding: 6px 8px; }
+  .dynRow .rm { border: none; background: none; color: #B33A3A; font-size: 16px; cursor: pointer; padding: 0 4px; flex-shrink: 0; }
+  .addBtn { border: 1px dashed #C7CAD1; background: #fff; border-radius: 6px; padding: 6px 10px;
+    font-size: 12px; color: #6B6D74; cursor: pointer; width: 100%; margin-top: 6px; }
+  .addBtn:hover { background: #F7F8FA; }
+
+  .tipoTag { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; display: inline-block; }
+  .tipo-factura { background: #E8EEFB; color: #2A4A9E; }
+  .tipo-regular { background: #F1F2F5; color: #4B4F5C; }
+  .tipo-encajonado { background: #FDEECB; color: #7A4E00; }
+  .contactChip { background: #F7F8FA; border: 1px solid #E8E9ED; border-radius: 7px; padding: 5px 9px;
+    font-size: 11.5px; white-space: nowrap; }
+  .contactChip .nom { font-weight: 600; }
+  .contactChip .meta { color: #6B6D74; }
 
   .importSummary { font-size: 13px; margin-top: 12px; max-height: 260px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; }
   .importSummary table { border-radius: 0; }
@@ -352,10 +378,14 @@
   .pk-tabPanel{display:none;} .pk-tabPanel.active{display:block;}
 
   .pk-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
-  .pk-fileBtn{border:1px dashed #C7CAD1;background:var(--surface);border-radius:8px;padding:9px 14px;
-    font-size:12.5px;color:var(--muted);display:flex;gap:8px;align-items:center;cursor:pointer;}
-  .pk-fileBtn b{color:var(--ink);font-weight:600;}
-  select,input[type=text],input[type=date]{border:1px solid var(--border);border-radius:7px;padding:7px 10px;
+  .pk-fileSlot{border:1px solid #C7CAD1;background:var(--surface);border-radius:8px;padding:7px 8px 7px 12px;
+    font-size:12px;color:var(--muted);display:flex;gap:10px;align-items:center;}
+  .pk-fileSlotName{font-weight:700;color:var(--ink);font-size:11px;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;}
+  .pk-fileSlotLbl{color:var(--muted);white-space:nowrap;}
+  .pk-fileUploadBtn{border:1px solid var(--border);background:#F7F8FA;border-radius:6px;width:26px;height:26px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);font-size:13px;flex-shrink:0;}
+  .pk-fileUploadBtn:hover{background:var(--ink);color:#fff;}
+  #section-picking select,#section-picking input[type=text],#section-picking input[type=date]{border:1px solid var(--border);border-radius:7px;padding:7px 10px;
     font-size:12.5px;font-family:var(--sans);color:var(--ink);background:var(--surface);}
   .pk-spacer{flex:1;}
   .pk-btn{border:none;border-radius:7px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--sans);}
@@ -427,6 +457,9 @@
   .pk-ticketBody{flex:1;padding:7px 12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
   .pk-ticketProv{min-width:160px;}
   .pk-ticketProv .pk-name{font-weight:700;font-size:12px;}
+  .pk-tipoTag{font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;text-transform:uppercase;letter-spacing:.02em;vertical-align:middle;}
+  .pk-tipoTagReg{background:#E8EEFB;color:#2A4A9E;}
+  .pk-tipoTagFact{background:#F1E6FA;color:#6B3AA6;}
   .pk-ticketProv .pk-code{color:var(--faint);font-size:10.5px;}
   .pk-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;display:inline-flex;
     align-items:center;gap:4px;}
@@ -441,14 +474,27 @@
   .pk-iconBtn{border:1px solid var(--border);background:var(--surface);border-radius:7px;
     padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink);}
 
-  .pk-dateMenu{display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--surface);
+  .pk-dateMenu{display:none;position:fixed;top:calc(100% + 6px);left:0;background:var(--surface);
     border:1px solid var(--border);border-radius:9px;box-shadow:0 8px 24px rgba(20,22,28,.12);
     padding:10px;width:236px;z-index:20;}
   .pk-dateMenu.show{display:block;}
-  .pk-calHead{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;font-weight:700;padding:2px 2px 8px;}
+  .pk-calHead{display:flex;align-items:center;gap:4px;font-size:12.5px;font-weight:700;padding:2px 2px 8px;}
+  .pk-calHead span{flex:1;text-align:center;}
   .pk-calNav{border:1px solid var(--border);background:var(--surface);border-radius:6px;width:24px;height:24px;
     cursor:pointer;font-size:13px;color:var(--muted);}
   .pk-calNav:hover{background:var(--bg);}
+
+  .pk-kpiRow{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:14px;padding:8px 0;
+    border-bottom:1px solid var(--border);font-size:12px;}
+  .pk-kpiMiniLbl{color:var(--faint);text-transform:uppercase;letter-spacing:.03em;font-size:11px;font-weight:600;}
+  .pk-kpiMiniLbl b{color:var(--ink);font-weight:700;font-size:12px;text-transform:none;letter-spacing:0;}
+  .pk-kpiMiniAlert, .pk-kpiMiniAlert b{color:var(--late-tx);}
+  .pk-kpiProgressWrap{display:flex;flex-direction:column;gap:3px;min-width:150px;}
+  .pk-kpiProgressTrack{width:100%;height:5px;background:#EEF0F3;border-radius:3px;overflow:hidden;}
+  .pk-kpiProgressFill{height:100%;background:var(--ok-dot);border-radius:3px;transition:width .3s;}
+  .pk-calCloseX{border:none;background:none;color:var(--faint);font-size:15px;cursor:pointer;
+    line-height:1;padding:0 2px;margin-left:2px;}
+  .pk-calCloseX:hover{color:var(--ink);}
   .pk-calQuick{display:flex;gap:6px;margin-bottom:8px;}
   .pk-calQuickBtn{flex:1;border:1px solid var(--border);background:var(--surface);border-radius:6px;
     padding:4px 0;font-size:11px;font-weight:600;color:var(--ink);cursor:pointer;}
@@ -489,7 +535,7 @@
   @page{ size: A4; margin: 14mm 12mm; }
 
   @media print{
-    header,#tabBar,.sidebar,.sidebarBackdrop,.pk-tabs,.pk-toolbar,.pk-ticketActions,.pk-btnGhost,.pk-printOnlyHide{display:none !important;}
+    header,#tabBar,.sidebar,.sidebarBackdrop,.pk-tabs,.pk-toolbar,.pk-ticketActions,.pk-btnGhost,.pk-kpiRow,.pk-printOnlyHide{display:none !important;}
     body{background:#fff;}
     .pk-wrap{padding:0;max-width:none;}
     .pk-sheet{display:none !important;}
@@ -635,17 +681,33 @@
         <button class="primary" id="btnAgregarProveedor" onclick="openManualModal()">+ Agregar proveedor</button>
       </div>
 
-      <table id="provTable">
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px;">
+        <button class="small" onclick="document.getElementById('provTableScroll').scrollBy({left:-300,behavior:'smooth'})" title="Desplazar a la izquierda">◀</button>
+        <button class="small" onclick="document.getElementById('provTableScroll').scrollBy({left:300,behavior:'smooth'})" title="Desplazar a la derecha">▶</button>
+      </div>
+      <div id="provTableScroll" style="overflow-x:auto;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+      <table id="provTable" style="width:max-content;min-width:100%;table-layout:fixed;">
+        <colgroup>
+          <col style="width:150px"><col style="width:220px"><col style="width:56px">
+          <col style="width:90px"><col style="width:130px"><col style="width:330px"><col style="width:330px">
+          <col style="width:130px"><col style="width:140px">
+        </colgroup>
         <thead>
           <tr>
-            <th>Código</th>
-            <th>Descripción</th>
+            <th style="position:sticky;left:0;z-index:2;background:#F7F8FA;">Código</th>
+            <th style="position:sticky;left:150px;z-index:2;background:#F7F8FA;">Descripción</th>
+            <th style="position:sticky;left:370px;z-index:2;background:#F7F8FA;box-shadow:1px 0 0 #eee;"></th>
             <th>Estado</th>
-            <th>Acciones</th>
+            <th>Tipo de recojo</th>
+            <th>CAM</th>
+            <th>Contacto proveedor</th>
+            <th>Modificado por</th>
+            <th>Fecha mod.</th>
           </tr>
         </thead>
         <tbody id="provTbody"></tbody>
       </table>
+      </div>
       <div id="provEmpty" class="emptyState" style="display:none">Aún no hay proveedores cargados. Agrega uno manualmente o importa una plantilla.</div>
 
       <p class="footNote">Rol actual: <span id="roleLabel"></span></p>
@@ -685,7 +747,7 @@
               <tbody id="semanaBody" style="position:relative"></tbody>
             </table>
           </div>
-          <div style="width:210px;flex-shrink:0;background:#FAFBFC;border:1px solid #E8E9ED;border-radius:8px;padding:10px;max-height:560px;overflow-y:auto">
+          <div style="width:340px;flex-shrink:0;background:#FAFBFC;border:1px solid #E8E9ED;border-radius:8px;padding:10px;max-height:560px;overflow-y:auto">
             <p style="font-size:11px;font-weight:600;color:#6B6D74;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 8px">Facturaciones pendientes</p>
             <div class="searchBox" style="margin-bottom:8px">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
@@ -778,6 +840,8 @@
                   <th>Personas</th>
                   <th>Estado</th>
                   <th>Comentario</th>
+                  <th>Modificado por</th>
+                  <th>Fecha mod.</th>
                 </tr>
               </thead>
               <tbody id="reporteTbody"></tbody>
@@ -814,6 +878,8 @@
                   <th>Hora</th>
                   <th>Estado</th>
                   <th>Comentario</th>
+                  <th>Modificado por</th>
+                  <th>Fecha mod.</th>
                 </tr>
               </thead>
               <tbody id="reporteFacturacionesTbody"></tbody>
@@ -836,9 +902,17 @@
   <!-- ============ TAB DETALLE ============ -->
   <div class="pk-tabPanel" id="pk-tab-detalle">
     <div class="pk-toolbar">
-      <label class="pk-fileBtn" for="pk-olasInput" id="pk-olasLabel">⬆ Subir <b>OLAS_PICKING.xlsx</b></label>
+      <div class="pk-fileSlot">
+        <span class="pk-fileSlotName">OLAS PICKING WEB REPORT</span>
+        <span class="pk-fileSlotLbl" id="pk-olasLabel">Sin datos cargados</span>
+        <label class="pk-fileUploadBtn" for="pk-olasInput" title="Cargar OLAS_PICKING.xlsx">⬆</label>
+      </div>
       <input type="file" id="pk-olasInput" accept=".xlsx,.xls" style="display:none" onchange="pkHandleOlasFile(this)">
-      <label class="pk-fileBtn" for="pk-allocInput" id="pk-allocLabel">⬆ Subir <b>Allocation.csv</b></label>
+      <div class="pk-fileSlot">
+        <span class="pk-fileSlotName">ASIGNACIONES</span>
+        <span class="pk-fileSlotLbl" id="pk-allocLabel">Sin datos cargados</span>
+        <label class="pk-fileUploadBtn" for="pk-allocInput" title="Cargar Allocation.csv">⬆</label>
+      </div>
       <input type="file" id="pk-allocInput" accept=".csv" style="display:none" onchange="pkHandleAllocFile(this)">
       <div class="pk-spacer"></div>
       <select id="pk-filtroEstado" onchange="pkRenderDetalle()"><option value="">Todos los estados</option><option>Asignado</option><option>Cancelado</option><option>Finalizado</option></select>
@@ -884,40 +958,26 @@
   <!-- ============ TAB REPORTE ============ -->
   <div class="pk-tabPanel active" id="pk-tab-reporte">
     <div class="pk-toolbar" style="position:relative;">
-      <div style="position:relative;">
-        <button class="pk-btnLink" onclick="pkToggleDateMenu()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
-          Fechas <span id="pk-dateSummary">(todas)</span> ▾
-        </button>
-        <div class="pk-dateMenu" id="pk-dateMenu">
-          <div class="pk-calHead">
-            <button class="pk-calNav" onclick="pkCalendarioCambiarMes(-1)">‹</button>
-            <span id="pk-calMesLabel">—</span>
-            <button class="pk-calNav" onclick="pkCalendarioCambiarMes(1)">›</button>
-          </div>
-          <div class="pk-calQuick">
-            <button class="pk-calQuickBtn" onclick="pkCalendarioTodos()">Todos</button>
-            <button class="pk-calQuickBtn" onclick="pkCalendarioNinguno()">Ninguno</button>
-          </div>
-          <div class="pk-calGridHead"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
-          <div class="pk-calGrid" id="pk-calGrid"></div>
-          <div class="pk-calFoot">Los días marcados en gris no tienen ninguna cita cargada.</div>
-        </div>
-      </div>
-      <select id="pk-filtroTipoCita" onchange="pkAplicarFiltroTipo()"><option value="">Recojo + Facturación</option><option value="recojo">Solo recojo</option><option value="facturacion">Solo facturación</option></select>
+      <input type="text" id="pk-filtroProveedorReporte" placeholder="Buscar por código o proveedor…" style="width:220px" oninput="pkFiltrarTarjetasProveedor()">
       <div class="pk-spacer"></div>
-      <button class="pk-btnLink" onclick="pkToggleUbic(this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        Ver ubicaciones asociadas
-      </button>
-      <button class="pk-btn pk-btnPrimary" onclick="pkPrintAll()">🖶 Imprimir todas las hojas</button>
+    </div>
+
+    <div class="pk-kpiRow">
+      <div class="pk-kpiProgressWrap">
+        <span class="pk-kpiMiniLbl">Tareas: <b id="pk-kpiTareasFrac">0/0</b> picadas</span>
+        <div class="pk-kpiProgressTrack"><div class="pk-kpiProgressFill" id="pk-kpiTareasFill" style="width:0%"></div></div>
+      </div>
+      <span class="pk-kpiMiniLbl">Proveedores Regular por picar: <b id="pk-kpiProvRegular">0</b></span>
+      <span class="pk-kpiMiniLbl">Proveedores Facturación por picar: <b id="pk-kpiProvFact">0</b></span>
+      <span class="pk-kpiMiniLbl">Proveedores picados: <b id="pk-kpiProvPicados">0</b></span>
+      <span class="pk-kpiMiniLbl pk-kpiMiniAlert">Atrasados: <b id="pk-kpiAtrasados">0</b></span>
     </div>
 
     <div class="pk-ubicPanel" id="pk-ubicPanel">
       <div class="pk-ubicPanelHead">
         <div>
           <h4><span id="pk-ubicCount">0</span> ubicaciones a picar</h4>
-          <div class="pk-sub">según el filtro de fecha y tipo de arriba</div>
+          <div class="pk-sub">según el filtro de fecha y tipo de Picking Regular</div>
         </div>
         <button class="pk-btn pk-btnGhost" style="font-size:11px;padding:5px 9px" onclick="pkExportarUbicaciones()">Exportar Excel</button>
       </div>
@@ -929,27 +989,78 @@
       </div>
     </div>
 
-    <div class="pk-sectionLbl">Recojo</div>
-    <div id="pk-recojoList"><div style="color:var(--faint);font-size:12.5px;padding:8px 0">Sube los archivos en la pestaña Detalle para calcular el reporte.</div></div>
+    <div class="pk-ubicPanel" id="pk-ubicPanelAtrasados">
+      <div class="pk-ubicPanelHead">
+        <div>
+          <h4><span id="pk-ubicAtrasadosCount">0</span> ubicaciones atrasadas</h4>
+          <div class="pk-sub">solo lo vencido, sin importar el filtro de fecha de arriba</div>
+        </div>
+        <button class="pk-btn pk-btnGhost" style="font-size:11px;padding:5px 9px" onclick="pkExportarUbicacionesAtrasadas()">Exportar Excel</button>
+      </div>
+      <div class="pk-scrollX">
+        <table>
+          <thead><tr><th>Ubicación</th><th>Motivo</th><th class="pk-num">Tareas</th><th class="pk-num">Display</th></tr></thead>
+          <tbody id="pk-ubicAtrasadosBody"></tbody>
+        </table>
+      </div>
+    </div>
 
-    <div class="pk-sectionLbl">Facturación</div>
-    <div id="pk-facturacionList"><div style="color:var(--faint);font-size:12.5px;padding:8px 0">—</div></div>
+    <div class="pk-sectionLbl">Picking Regular</div>
+    <div class="pk-toolbar" style="position:relative;margin-top:-4px;">
+      <div style="position:relative;">
+        <button class="pk-btnLink" onclick="pkToggleDateMenu(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+          Fechas <span id="pk-dateSummary">(todas)</span> ▾
+        </button>
+        <div class="pk-dateMenu" id="pk-dateMenu">
+          <button class="pk-calCloseX" style="position:absolute;top:8px;right:8px;" onclick="pkToggleDateMenu()" title="Cerrar" aria-label="Cerrar">×</button>
+          <div class="pk-calHead">
+            <button class="pk-calNav" onclick="pkCalendarioCambiarMes(-1)">‹</button>
+            <span id="pk-calMesLabel">—</span>
+            <button class="pk-calNav" onclick="pkCalendarioCambiarMes(1)">›</button>
+          </div>
+          <div class="pk-calQuick">
+            <button class="pk-calQuickBtn" onclick="pkCalendarioTodos()">Todos</button>
+            <button class="pk-calQuickBtn" onclick="pkCalendarioNinguno()">Ninguno</button>
+          </div>
+          <div class="pk-calGridHead"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+          <div id="pk-calGrid" class="pk-calGrid"></div>
+          <div class="pk-calFoot">Clic: marca/desmarca un día. Shift + clic: selecciona el rango entre el último día marcado y este. Cuando termines, dale a Filtrar.</div>
+          <button class="pk-btn pk-btnPrimary" style="width:100%;margin-top:10px;" onclick="pkFiltrarFechas()">🔍 Filtrar</button>
+        </div>
+      </div>
+      <select id="pk-filtroTipoCita" onchange="pkAplicarFiltroTipo()"><option value="">Recojo + Facturación</option><option value="recojo">Solo recojo</option><option value="facturacion">Solo facturación</option></select>
+      <div class="pk-spacer"></div>
+      <button class="pk-btnLink" onclick="pkToggleUbic(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Ver ubicaciones asociadas
+      </button>
+      <button class="pk-btn pk-btnPrimary" onclick="pkPrintAll()">🖶 Imprimir todas las hojas</button>
+    </div>
+    <div id="pk-recojoList"><div style="color:var(--faint);font-size:12.5px;padding:8px 0">Sube los archivos en la pestaña Detalle para calcular el reporte.</div></div>
+    <div id="pk-facturacionList"></div>
+
+    <div class="pk-sectionLbl" id="pk-atrasadosSeccion" style="display:none;align-items:center;gap:10px;">
+      ⏰ Atrasados
+      <span class="pk-warnCount" id="pk-atrasadosCount">0</span>
+      <button class="pk-iconBtn" onclick="pkToggleUbicAtrasados(this)" style="margin-left:auto">📍 Ver ubicaciones atrasadas</button>
+      <button class="pk-iconBtn" onclick="pkImprimirAtrasados()">🖶 Imprimir todos los atrasados</button>
+    </div>
+    <div id="pk-atrasadosList"></div>
 
     <div class="pk-sectionLbl" style="display:flex;align-items:center;gap:8px;">
-      ⚠ Sin cita · revisar
+      ⚠ Sin cita · revisar <span style="font-weight:400;color:var(--faint);font-size:11px;text-transform:none">— una por una, sin botón de imprimir todas</span>
       <span class="pk-warnCount" id="pk-warnCount">0</span>
     </div>
-    <div class="pk-card pk-printOnlyHide" style="margin-bottom:16px;border-color:#F3D9A0;">
-      <table>
-        <thead><tr><th>Proveedor</th><th>Cod. proveedor</th><th class="pk-num">Tareas</th><th class="pk-num">Ubicaciones</th><th class="pk-num">Display</th><th style="width:260px">Acción</th></tr></thead>
-        <tbody id="pk-sinCitaBody"></tbody>
-      </table>
-    </div>
+    <div id="pk-sinCitaList"><div style="color:var(--faint);font-size:12.5px;padding:8px 0">Todos los proveedores con tareas asignadas ya tienen cita.</div></div>
 
-    <div class="pk-sectionLbl">✓ Sin pendientes · ya picado o empacado</div>
+    <div class="pk-sectionLbl" style="display:flex;align-items:center;gap:10px;">
+      ✓ Sin pendientes · ya picado o empacado
+      <input type="text" id="pk-filtroCompletados" placeholder="Buscar por código o proveedor…" style="width:200px;text-transform:none;font-weight:400;margin-left:auto" oninput="pkFiltrarCompletados()">
+    </div>
     <div class="pk-card pk-printOnlyHide" style="margin-bottom:16px;">
       <table>
-        <thead><tr><th>Proveedor</th><th>Cod. proveedor</th><th>Estado de sus líneas</th></tr></thead>
+        <thead><tr><th>Proveedor</th><th>Cod. proveedor</th><th>Tipo</th><th>Estado de sus líneas</th></tr></thead>
         <tbody id="pk-completadosBody"></tbody>
       </table>
     </div>
@@ -1158,7 +1269,7 @@
 
 <!-- MODAL: manual add/edit -->
 <div class="overlay" id="manualOverlay">
-  <div class="modal">
+  <div class="modal" style="max-width:480px">
     <button class="modalCloseX" onclick="closeManualModal()" aria-label="Cerrar">×</button>
     <h3 id="manualTitle">Agregar proveedor</h3>
     <div id="manualError" class="msg error" style="display:none"></div>
@@ -1170,6 +1281,23 @@
       <input type="checkbox" id="mActivo" checked>
       <label style="margin:0">Activo</label>
     </div>
+
+    <label>Tipo de recojo</label>
+    <select id="mTipoRecojo">
+      <option value="">Sin especificar</option>
+      <option value="Factura">Factura</option>
+      <option value="Regular">Regular</option>
+      <option value="Encajonado">Encajonado</option>
+    </select>
+
+    <label>CAM <span style="font-weight:400;color:#8A8F9C;font-size:11px">— personal habilitado para ingresar, independiente del tipo de recojo</span></label>
+    <div class="dynSection" id="mCamList"></div>
+    <button type="button" class="addBtn" onclick="agregarFilaDinamica('mCamList', 'cam')">+ Agregar persona</button>
+
+    <label>Contacto proveedor <span style="font-weight:400;color:#8A8F9C;font-size:11px">— para consultas generales</span></label>
+    <div class="dynSection" id="mContactoList"></div>
+    <button type="button" class="addBtn" onclick="agregarFilaDinamica('mContactoList', 'contacto')">+ Agregar contacto</button>
+
     <div class="actions">
       <button class="secondary" onclick="closeManualModal()">Cancelar</button>
       <button class="primary" onclick="saveManual()">Guardar</button>
@@ -1271,6 +1399,16 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
 let currentRole = null;
+let currentUserNombre = null;
+
+// Agrega automáticamente quién hizo el cambio y cuándo, a cualquier insert/update
+// de citas o proveedores — se usa para el registro de auditoría.
+function withAudit(obj){
+  return Object.assign({}, obj, {
+    modificado_por: currentUserNombre || (currentUser && currentUser.email) || 'desconocido',
+    modificado_en: new Date().toISOString()
+  });
+}
 let pendingImportRows = [];
 let allProveedores = [];
 let openTabs = [];
@@ -1463,6 +1601,7 @@ async function afterLogin(user) {
     return;
   }
   currentRole = perfil.rol;
+  currentUserNombre = perfil.nombre || user.email;
   await cargarPermisosDelRol(currentRole);
   document.getElementById('userLabel').textContent = perfil.nombre || user.email;
   document.getElementById('roleLabel').textContent = ROLE_LABELS[currentRole] || currentRole;
@@ -1476,6 +1615,11 @@ async function afterLogin(user) {
   loadTabsFromStorage();
   renderTabs();
   setActiveTab(activeTabId);
+
+  // Cargamos OLAS_PICKING + Allocation en segundo plano al iniciar sesión, sin esperar a que
+  // la persona entre a la pestaña Picking — así el estado de picking ya está disponible
+  // desde el primer momento (por ejemplo, en el popover de días de Citas).
+  if (typeof pkInitPicking === 'function') pkInitPicking();
 }
 
 async function doLogout() {
@@ -1513,23 +1657,38 @@ function renderProveedoresTable() {
   empty.style.display = 'none';
 
   const canEdit = puede('actualizar');
+  const TIPO_TAG_CLASE = { Factura: 'tipo-factura', Regular: 'tipo-regular', Encajonado: 'tipo-encajonado' };
+  const renderPersonas = (arr, conTelefono) => {
+    if (!arr || !arr.length) return '<span style="color:#B3A9A0;font-size:12px">—</span>';
+    return '<div style="display:flex;flex-wrap:wrap;gap:6px">' + arr.map(x =>
+      '<div class="contactChip"><span class="nom">' + (x.nombre || '') + '</span><br><span class="meta">' +
+      [x.correo, conTelefono ? x.telefono : null].filter(Boolean).join(' · ') + '</span></div>'
+    ).join('') + '</div>';
+  };
   list.forEach(p => {
     const tr = document.createElement('tr');
+    const tipoTag = p.tipo_recojo
+      ? '<span class="tipoTag ' + (TIPO_TAG_CLASE[p.tipo_recojo] || '') + '">' + p.tipo_recojo + '</span>'
+      : '<span style="color:#B3A9A0;font-size:12px">—</span>';
     tr.innerHTML = `
-      <td><span class="codeTag">${p.codigo}</span></td>
-      <td>${p.descripcion}</td>
-      <td><span class="badge ${p.activo ? 'on' : 'off'}">${p.activo ? 'Activo' : 'Inactivo'}</span></td>
-      <td>
-        ${canEdit ? `<button class="small" onclick='openEditModal(${JSON.stringify(p)})'>Editar</button>
-        <button class="small danger" onclick="toggleActivo('${p.codigo}', ${!p.activo})">${p.activo ? 'Desactivar' : 'Activar'}</button>` : '—'}
+      <td style="position:sticky;left:0;background:#fff;z-index:1;"><span class="codeTag">${p.codigo}</span></td>
+      <td style="position:sticky;left:150px;background:#fff;z-index:1;">${p.descripcion}</td>
+      <td style="position:sticky;left:370px;background:#fff;z-index:1;box-shadow:1px 0 0 #eee;text-align:center">
+        ${canEdit ? `<button class="small" title="Editar" style="padding:6px 8px" onclick='openEditModal(${JSON.stringify(p)})'>✏️</button>` : '—'}
       </td>
+      <td><span class="badge ${p.activo ? 'on' : 'off'}">${p.activo ? 'Activo' : 'Inactivo'}</span></td>
+      <td>${tipoTag}</td>
+      <td>${renderPersonas(p.cam, false)}</td>
+      <td>${renderPersonas(p.contacto, true)}</td>
+      <td style="font-size:12px;color:#6B6D74">${p.modificado_por || '—'}</td>
+      <td style="font-size:12px;color:#6B6D74">${p.modificado_en ? new Date(p.modificado_en).toLocaleString('es-PE') : '—'}</td>
     `;
     tbody.appendChild(tr);
   });
 }
 
 async function toggleActivo(codigo, nuevoEstado) {
-  const { error } = await sb.from('proveedores').update({ activo: nuevoEstado }).eq('codigo', codigo);
+  const { error } = await sb.from('proveedores').update(withAudit({ activo: nuevoEstado })).eq('codigo', codigo);
   if (error) { showGlobalMsg("No se pudo actualizar el proveedor.", "error"); return; }
   showGlobalMsg("Proveedor actualizado.", "success");
   loadProveedores();
@@ -1538,6 +1697,43 @@ async function toggleActivo(codigo, nuevoEstado) {
 // ---- Manual modal ----
 let editingCodigoOriginal = null;
 
+function agregarFilaDinamica(containerId, tipo, valores) {
+  const cont = document.getElementById(containerId);
+  const row = document.createElement('div');
+  row.className = 'dynRow';
+  const n = valores && valores.nombre ? valores.nombre.replace(/"/g, '&quot;') : '';
+  const c = valores && valores.correo ? valores.correo.replace(/"/g, '&quot;') : '';
+  if (tipo === 'contacto') {
+    const t = valores && valores.telefono ? valores.telefono.replace(/"/g, '&quot;') : '';
+    row.innerHTML = `
+      <input type="text" placeholder="Nombre" class="dNombre" value="${n}" style="flex:1.3">
+      <input type="text" placeholder="Correo" class="dCorreo" value="${c}">
+      <input type="text" placeholder="Teléfono" class="dTelefono" value="${t}" style="flex:0.7">
+      <button type="button" class="rm" onclick="this.parentElement.remove()" title="Quitar">×</button>
+    `;
+  } else {
+    row.innerHTML = `
+      <input type="text" placeholder="Nombre" class="dNombre" value="${n}">
+      <input type="text" placeholder="Correo" class="dCorreo" value="${c}">
+      <button type="button" class="rm" onclick="this.parentElement.remove()" title="Quitar">×</button>
+    `;
+  }
+  cont.appendChild(row);
+}
+
+function leerFilasDinamicas(containerId, tipo) {
+  const cont = document.getElementById(containerId);
+  const filas = [...cont.querySelectorAll('.dynRow')];
+  return filas.map(row => {
+    const obj = {
+      nombre: row.querySelector('.dNombre').value.trim(),
+      correo: row.querySelector('.dCorreo').value.trim()
+    };
+    if (tipo === 'contacto') obj.telefono = row.querySelector('.dTelefono').value.trim();
+    return obj;
+  }).filter(o => o.nombre || o.correo || o.telefono);
+}
+
 function openManualModal() {
   editingCodigoOriginal = null;
   document.getElementById('manualTitle').textContent = "Agregar proveedor";
@@ -1545,6 +1741,9 @@ function openManualModal() {
   document.getElementById('mCodigo').disabled = false;
   document.getElementById('mDescripcion').value = "";
   document.getElementById('mActivo').checked = true;
+  document.getElementById('mTipoRecojo').value = "";
+  document.getElementById('mCamList').innerHTML = "";
+  document.getElementById('mContactoList').innerHTML = "";
   document.getElementById('manualError').style.display = 'none';
   document.getElementById('manualOverlay').classList.add('show');
 }
@@ -1556,6 +1755,16 @@ function openEditModal(p) {
   document.getElementById('mCodigo').disabled = true;
   document.getElementById('mDescripcion').value = p.descripcion;
   document.getElementById('mActivo').checked = p.activo;
+  document.getElementById('mTipoRecojo').value = p.tipo_recojo || "";
+
+  const mCamList = document.getElementById('mCamList');
+  mCamList.innerHTML = "";
+  (p.cam || []).forEach(persona => agregarFilaDinamica('mCamList', 'cam', persona));
+
+  const mContactoList = document.getElementById('mContactoList');
+  mContactoList.innerHTML = "";
+  (p.contacto || []).forEach(contacto => agregarFilaDinamica('mContactoList', 'contacto', contacto));
+
   document.getElementById('manualError').style.display = 'none';
   document.getElementById('manualOverlay').classList.add('show');
 }
@@ -1568,6 +1777,9 @@ async function saveManual() {
   const codigo = document.getElementById('mCodigo').value.trim();
   const descripcion = document.getElementById('mDescripcion').value.trim();
   const activo = document.getElementById('mActivo').checked;
+  const tipo_recojo = document.getElementById('mTipoRecojo').value || null;
+  const cam = leerFilasDinamicas('mCamList', 'cam');
+  const contacto = leerFilasDinamicas('mContactoList', 'contacto');
   const errEl = document.getElementById('manualError');
 
   if (!codigo || !descripcion) {
@@ -1578,9 +1790,9 @@ async function saveManual() {
 
   let error;
   if (editingCodigoOriginal) {
-    ({ error } = await sb.from('proveedores').update({ descripcion, activo }).eq('codigo', editingCodigoOriginal));
+    ({ error } = await sb.from('proveedores').update(withAudit({ descripcion, activo, tipo_recojo, cam, contacto })).eq('codigo', editingCodigoOriginal));
   } else {
-    ({ error } = await sb.from('proveedores').insert({ codigo, descripcion, activo }));
+    ({ error } = await sb.from('proveedores').insert(withAudit({ codigo, descripcion, activo, tipo_recojo, cam, contacto })));
   }
 
   if (error) {
@@ -1610,13 +1822,24 @@ function closeImportModal() {
 
 function downloadTemplate() {
   const ws = XLSX.utils.json_to_sheet([
-    { codigo: "0231", descripcion: "Distribuidora Norte", activo: "TRUE" },
-    { codigo: "0245", descripcion: "Suministros del Sur", activo: "TRUE" }
+    { codigo: "0231", descripcion: "Distribuidora Norte", activo: "TRUE", tipo_recojo: "Factura", cam: "Jorge Salas, jsalas@correo.com; Carla Ponce, cponce@correo.com", contacto: "Rosa Díaz, rosa@correo.com, 987654321" },
+    { codigo: "0245", descripcion: "Suministros del Sur", activo: "TRUE", tipo_recojo: "Regular", cam: "", contacto: "" }
   ]);
   forzarColumnaTexto(ws, 'A'); // columna "codigo" siempre como texto, para no perder ceros a la izquierda
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Proveedores");
   XLSX.writeFile(wb, "plantilla_proveedores.xlsx");
+}
+
+// "Nombre, correo[, teléfono]; Nombre2, correo2..." -> [{nombre,correo,[telefono]}, ...]
+function parsePersonasTexto(texto, conTelefono) {
+  if (!texto || !String(texto).trim()) return [];
+  return String(texto).split(';').map(s => s.trim()).filter(Boolean).map(entry => {
+    const partes = entry.split(',').map(p => p.trim());
+    const obj = { nombre: partes[0] || '', correo: partes[1] || '' };
+    if (conTelefono) obj.telefono = partes[2] || '';
+    return obj;
+  }).filter(p => p.nombre || p.correo);
 }
 
 function forzarColumnaTexto(ws, columnaLetra) {
@@ -1644,7 +1867,14 @@ async function handleFile(file) {
         const descripcion = String(r.descripcion ?? r.Descripcion ?? r.DESCRIPCION ?? "").trim();
         let activoRaw = r.activo ?? r.Activo ?? r.ACTIVO ?? "TRUE";
         const activo = String(activoRaw).trim().toUpperCase() !== "FALSE";
-        return { codigo, descripcion, activo };
+        const tipo_recojo = String(r.tipo_recojo ?? r['Tipo de recojo'] ?? r.TIPO_RECOJO ?? "").trim();
+        const camTexto = String(r.cam ?? r.CAM ?? "").trim();
+        const contactoTexto = String(r.contacto ?? r['Contacto proveedor'] ?? r.CONTACTO ?? "").trim();
+        return {
+          codigo, descripcion, activo,
+          tipo_recojo, cam: parsePersonasTexto(camTexto, false), contacto: parsePersonasTexto(contactoTexto, true),
+          _tipoRecojoVacio: !tipo_recojo, _camVacio: !camTexto, _contactoVacio: !contactoTexto
+        };
       }).filter(r => r.codigo && r.descripcion);
 
       if (parsed.length === 0) {
@@ -1653,13 +1883,25 @@ async function handleFile(file) {
         return;
       }
 
-      const { data: existentes } = await sb.from('proveedores').select('codigo');
-      const existentesSet = new Set((existentes || []).map(p => p.codigo));
+      const { data: existentes } = await sb.from('proveedores').select('codigo, tipo_recojo, cam, contacto');
+      const existentesMap = {};
+      (existentes || []).forEach(p => { existentesMap[p.codigo] = p; });
 
-      pendingImportRows = parsed.map(r => ({
-        ...r,
-        esNuevo: !existentesSet.has(r.codigo)
-      }));
+      pendingImportRows = parsed.map(r => {
+        const previo = existentesMap[r.codigo];
+        const esNuevo = !previo;
+        // Si viene vacío en el Excel y el proveedor YA existía, conservamos lo que ya tenía en vez de borrarlo.
+        // Si viene lleno, se sobrescribe con lo del Excel — tal como pediste.
+        const tipo_recojo = r._tipoRecojoVacio && previo ? (previo.tipo_recojo || '') : r.tipo_recojo;
+        const cam = r._camVacio && previo ? (previo.cam || []) : r.cam;
+        const contacto = r._contactoVacio && previo ? (previo.contacto || []) : r.contacto;
+        // Para un proveedor NUEVO, estos campos si son obligatorios.
+        const faltanObligatorios = esNuevo && (r._tipoRecojoVacio || r._camVacio || r._contactoVacio);
+        return {
+          codigo: r.codigo, descripcion: r.descripcion, activo: r.activo,
+          tipo_recojo, cam, contacto, esNuevo, faltanObligatorios
+        };
+      });
 
       renderImportSummary();
     } catch (err) {
@@ -1677,23 +1919,36 @@ function renderImportSummary() {
 
   const tbody = document.getElementById('importSummaryBody');
   tbody.innerHTML = "";
-  let nuevos = 0, reemplazos = 0;
+  let nuevos = 0, reemplazos = 0, incompletos = 0;
   pendingImportRows.forEach(r => {
     if (r.esNuevo) nuevos++; else reemplazos++;
+    if (r.faltanObligatorios) incompletos++;
     const tr = document.createElement('tr');
+    const estadoTag = r.faltanObligatorios
+      ? '<span class="tag replace" style="background:#FAECE7;color:#712B13">Falta Tipo de recojo, CAM y/o Contacto (obligatorio en proveedor nuevo)</span>'
+      : `<span class="tag ${r.esNuevo ? 'new' : 'replace'}">${r.esNuevo ? 'Nuevo' : 'Reemplazo'}</span>`;
     tr.innerHTML = `
       <td>${r.codigo}</td>
       <td>${r.descripcion}</td>
-      <td><span class="tag ${r.esNuevo ? 'new' : 'replace'}">${r.esNuevo ? 'Nuevo' : 'Reemplazo'}</span></td>
+      <td>${estadoTag}</td>
     `;
     tbody.appendChild(tr);
   });
-  document.getElementById('importCounts').textContent = `${nuevos} nuevo(s), ${reemplazos} reemplazo(s) de ${pendingImportRows.length} filas totales.`;
+  document.getElementById('importCounts').textContent =
+    `${nuevos} nuevo(s), ${reemplazos} reemplazo(s) de ${pendingImportRows.length} filas totales.` +
+    (incompletos ? ` ⚠ ${incompletos} fila(s) nueva(s) sin Tipo de recojo/CAM/Contacto no se van a importar.` : '');
 }
 
 async function confirmImport() {
   const errEl = document.getElementById('importError');
-  const rowsToUpsert = pendingImportRows.map(({ codigo, descripcion, activo }) => ({ codigo, descripcion, activo }));
+  const filasValidas = pendingImportRows.filter(r => !r.faltanObligatorios);
+  if (filasValidas.length === 0) {
+    errEl.textContent = "No hay filas listas para importar — completa Tipo de recojo, CAM y Contacto en las filas nuevas.";
+    errEl.style.display = 'block';
+    return;
+  }
+  const rowsToUpsert = filasValidas.map(({ codigo, descripcion, activo, tipo_recojo, cam, contacto }) =>
+    withAudit({ codigo, descripcion, activo, tipo_recojo, cam, contacto }));
   const { error } = await sb.from('proveedores').upsert(rowsToUpsert, { onConflict: 'codigo' });
   if (error) {
     errEl.textContent = "Ocurrió un error al importar: " + error.message;
@@ -1701,7 +1956,7 @@ async function confirmImport() {
     return;
   }
   closeImportModal();
-  showGlobalMsg(`Importación completa: ${pendingImportRows.length} proveedor(es) procesado(s).`, "success");
+  showGlobalMsg(`Importación completa: ${filasValidas.length} proveedor(es) procesado(s).`, "success");
   loadProveedores();
 }
 
@@ -1951,14 +2206,14 @@ async function saveCita() {
     if (!estado) { errEl.textContent = "Selecciona un estado."; errEl.style.display = 'block'; return; }
 
     if (citaModoEdicion === 'editar' && citaClickeada) {
-      const { error } = await sb.from('citas').update({ estado, comentario }).eq('id', citaClickeada.id);
+      const { error } = await sb.from('citas').update(withAudit({ estado, comentario })).eq('id', citaClickeada.id);
       if (error) { errEl.textContent = "No se pudo guardar: " + error.message; errEl.style.display = 'block'; return; }
     } else {
-      const registro = {
+      const registro = withAudit({
         codigo_proveedor: proveedorSeleccionadoCita.codigo,
         fecha: todayStr(), hora_inicio: null, hora_fin: null, placa: null, personas: null, dias_revision: null,
         tipo: 'facturacion', estado, comentario, agendado_por: currentUser.id
-      };
+      });
       const { error } = await sb.from('citas').insert(registro);
       if (error) { errEl.textContent = "No se pudo guardar: " + error.message; errEl.style.display = 'block'; return; }
     }
@@ -2028,13 +2283,13 @@ async function saveCita() {
     return;
   }
 
-  const nuevaCita = {
+  const nuevaCita = withAudit({
     codigo_proveedor: proveedorSeleccionadoCita.codigo,
     fecha, hora_inicio: horaInicio, hora_fin: horaFin,
     placa: placa || null, personas, agendado_por: currentUser.id,
     dias_revision: diasRevisionSeleccionados.size > 0 ? Array.from(diasRevisionSeleccionados) : null,
     tipo: 'recojo', estado, comentario
-  };
+  });
 
   if (citaModoEdicion === 'editar' && citaClickeada) {
     // mover la cita anterior al historial, marcada como reagendada
@@ -2158,7 +2413,7 @@ function renderFacturacionesVista() {
     `;
 
     tr.querySelector('.fvEstado').onchange = async (e) => {
-      const { error } = await sb.from('citas').update({ estado: e.target.value }).eq('id', f.id);
+      const { error } = await sb.from('citas').update(withAudit({ estado: e.target.value })).eq('id', f.id);
       if (error) { showGlobalMsg("No se pudo actualizar: " + error.message, "error"); return; }
       f.estado = e.target.value;
       showGlobalMsg("Estado actualizado.", "success");
@@ -2166,7 +2421,7 @@ function renderFacturacionesVista() {
     tr.querySelector('.fvComentario').onblur = async (e) => {
       const nuevo = e.target.value.trim() || null;
       if (nuevo === f.comentario) return;
-      const { error } = await sb.from('citas').update({ comentario: nuevo }).eq('id', f.id);
+      const { error } = await sb.from('citas').update(withAudit({ comentario: nuevo })).eq('id', f.id);
       if (error) { showGlobalMsg("No se pudo guardar el comentario: " + error.message, "error"); return; }
       f.comentario = nuevo;
       showGlobalMsg("Comentario guardado.", "success");
@@ -2249,6 +2504,8 @@ function renderReporteFacturaciones() {
       <td>${hora}</td>
       <td>${ETIQUETAS_ESTADO_FACT_REPORTE[f.estado] || f.estado || '—'}</td>
       <td style="font-size:12px">${f.comentario || '—'}</td>
+      <td style="font-size:12px;color:#6B6D74">${f.modificado_por || '—'}</td>
+      <td style="font-size:12px;color:#6B6D74">${f.modificado_en ? new Date(f.modificado_en).toLocaleString('es-PE') : '—'}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -2327,6 +2584,8 @@ function renderReporte() {
       <td style="font-size:12px">${esFact ? '—' : personas}</td>
       <td>${etiquetaEstado(c)}</td>
       <td style="font-size:12px">${c.comentario || '—'}</td>
+      <td style="font-size:12px;color:#6B6D74">${c.modificado_por || '—'}</td>
+      <td style="font-size:12px;color:#6B6D74">${c.modificado_en ? new Date(c.modificado_en).toLocaleString('es-PE') : '—'}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -2422,18 +2681,24 @@ async function loadFacturacionesPendientes() {
     const div = document.createElement('div');
     div.className = 'facturaCard';
     const fechaReg = f.creado_en ? new Date(f.creado_en).toLocaleDateString('es-PE') : '—';
+    const pk = (typeof pkEstadoPickingDeProveedor === 'function') ? pkEstadoPickingDeProveedor(f.codigo_proveedor) : null;
+    const pickingHtml = pk
+      ? '<div class="dayPopoverPicking" style="margin-top:3px"><span class="dayPopoverPickingLbl">' + pk.estado + ' (' + pk.pct + '%) · ' + pk.picadas + '/' + pk.total + '</span>'
+        + '<div class="dayPopoverPickingTrack"><div class="dayPopoverPickingFill dayPopoverPickingFill-' + pk.estado.replace(' ', '') + '" style="width:' + pk.pct + '%"></div></div></div>'
+      : '';
     div.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px">
         <div class="fcProv" style="flex:1">${f.proveedores ? f.proveedores.descripcion : f.codigo_proveedor}</div>
         <button title="Marcar como Facturado" style="border:1px solid #FF7D7D;background:#fff;color:#B33A3A;border-radius:5px;padding:2px 6px;flex-shrink:0;cursor:pointer;font-size:10px;white-space:nowrap">Facturar</button>
       </div>
       <div class="fcFecha">${fechaReg}</div>
+      ${pickingHtml}
     `;
     div.querySelector('button').onclick = async (e) => {
       e.stopPropagation();
       const nombreProv = f.proveedores ? f.proveedores.descripcion : f.codigo_proveedor;
       if (!confirm(`¿Estás seguro de cambiar el estado de "${nombreProv}" a Facturado?`)) return;
-      const { error } = await sb.from('citas').update({ estado: 'facturado' }).eq('id', f.id);
+      const { error } = await sb.from('citas').update(withAudit({ estado: 'facturado' })).eq('id', f.id);
       if (error) { showGlobalMsg("No se pudo actualizar: " + error.message, "error"); return; }
       showGlobalMsg("Marcado como Facturado.", "success");
       loadFacturacionesPendientes();
@@ -2459,7 +2724,15 @@ function mostrarCitasDelDia(fechaISO, anchorEl) {
     cont.innerHTML = citasDelDia.map(c => {
       const nombre = c.proveedores ? c.proveedores.descripcion : c.codigo_proveedor;
       const hora = (c.hora_inicio || '').slice(0, 5) + (c.hora_fin ? '-' + c.hora_fin.slice(0, 5) : '');
-      return '<div class="dayPopoverRow"><span class="prov">' + nombre + '</span><span class="hora">' + hora + '</span></div>';
+      const pk = (typeof pkEstadoPickingDeProveedor === 'function') ? pkEstadoPickingDeProveedor(c.codigo_proveedor) : null;
+      const pickingHtml = pk
+        ? '<div class="dayPopoverPicking"><span class="dayPopoverPickingLbl">' + pk.estado + ' (' + pk.pct + '%) · ' + pk.picadas + '/' + pk.total + '</span>'
+          + '<div class="dayPopoverPickingTrack"><div class="dayPopoverPickingFill dayPopoverPickingFill-' + pk.estado.replace(' ', '') + '" style="width:' + pk.pct + '%"></div></div></div>'
+        : '<div class="dayPopoverPicking"><span class="dayPopoverPickingLbl" style="color:#B3A9A0">Sin datos de picking</span></div>';
+      return '<div class="dayPopoverRow" style="flex-direction:column;align-items:stretch;gap:2px">'
+        + '<div style="display:flex;justify-content:space-between"><span class="prov">' + nombre + '</span><span class="hora">' + hora + '</span></div>'
+        + pickingHtml
+        + '</div>';
     }).join('');
   }
 
@@ -2666,12 +2939,12 @@ async function reagendarPorArrastre(cita, nuevaFecha, nuevaHoraInicio, nuevaHora
   const cruza = (existentes || []).some(c => c.id !== cita.id && nuevaHoraInicio < c.hora_fin.slice(0,5) && nuevaHoraFin > c.hora_inicio.slice(0,5));
   if (cruza) { showGlobalMsg("Ese proveedor ya tiene una cita que se cruza en el nuevo horario.", "error"); return; }
 
-  const nuevaCita = {
+  const nuevaCita = withAudit({
     codigo_proveedor: cita.codigo_proveedor, fecha: nuevaFecha,
     hora_inicio: nuevaHoraInicio, hora_fin: nuevaHoraFin,
     placa: cita.placa, personas: cita.personas, agendado_por: currentUser.id,
     dias_revision: cita.dias_revision || null
-  };
+  });
   const { data: nuevaInsertada, error: insertError } = await sb.from('citas').insert(nuevaCita).select().single();
   if (insertError) { showGlobalMsg("No se pudo reagendar: " + insertError.message, "error"); return; }
 
@@ -2982,7 +3255,7 @@ async function confirmImportCitas() {
     return;
   }
 
-  const registros = filasValidas.map(r => ({
+  const registros = filasValidas.map(r => withAudit({
     codigo_proveedor: r.codigo_proveedor, fecha: r.fecha,
     hora_inicio: r.hora_inicio || null, hora_fin: r.hora_fin || null,
     placa: r.placa || null, personas: r.personas.length ? r.personas : null,
@@ -3308,14 +3581,48 @@ let pkGrupoActual = {};
 let pkFechasSeleccionadas = undefined; // undefined = aún no inicializado (se pone en "hoy" la primera vez). null = todas.
 let pkPickingInicializado = false;
 let pkUbicacionesActuales = [];
+let pkCodigoRealAOriginales = {}; // codigo real (el de citas/proveedores) -> código(s) original(es) de OLAS_PICKING
+
+// Para usar desde el popover de días de Citas: dado un codigo_proveedor (el real, el de la tabla
+// proveedores/citas), calcula si ese proveedor ya está Picado, Picado parcial o Sin picar,
+// según el estado de sus líneas en Allocation. Si Picking no se ha cargado en esta sesión, devuelve null.
+function pkEstadoPickingDeProveedor(codigoRealProveedor){
+  if (typeof pkDetalle === 'undefined' || !pkDetalle.length) return null;
+  const originales = pkCodigoRealAOriginales[codigoRealProveedor] || pkCodigoRealAOriginales[pkNormalizaCodigo(codigoRealProveedor)];
+  if (!originales || !originales.length) return null;
+  let totalLineas = 0, lineasPicadas = 0;
+  pkDetalle.forEach(d => {
+    if (!originales.includes(d.codProveedor)) return;
+    totalLineas++;
+    // Cancelado y Finalizado cuentan como ya picado. Solo Asignado es lo que falta por picar.
+    if (d.estado !== 'Asignado') lineasPicadas++;
+  });
+  if (totalLineas === 0) return null;
+  const pct = Math.round((lineasPicadas / totalLineas) * 100);
+  let estado;
+  if (lineasPicadas === totalLineas) estado = 'Picado';
+  else if (lineasPicadas === 0) estado = 'Sin picar';
+  else estado = 'Picado parcial';
+  return { estado, pct, picadas: lineasPicadas, total: totalLineas };
+}
+let pkUbicacionesAtrasadasActuales = [];
 
 async function pkInitPicking(){
   if (pkPickingInicializado) return;
   pkPickingInicializado = true;
 
-  if (!pkOlasRows.length) {
-    document.getElementById('pk-olasLabel').innerHTML = 'Buscando datos guardados…';
-    const { data, error } = await sb.from('olas_picking').select('*');
+  if (!pkOlasRows.length) document.getElementById('pk-olasLabel').textContent = 'Buscando…';
+  if (!pkAllocRows.length) document.getElementById('pk-allocLabel').textContent = 'Buscando…';
+
+  // OLAS_PICKING y Allocation no dependen uno del otro para leerse — los pedimos los dos
+  // a la vez en vez de esperar a que termine uno para recién pedir el otro.
+  const [olasResultado, allocResultado] = await Promise.all([
+    pkOlasRows.length ? Promise.resolve(null) : sb.from('olas_picking').select('*'),
+    pkAllocRows.length ? Promise.resolve(null) : pkCargarAllocDeSupabase()
+  ]);
+
+  if (olasResultado) {
+    const { data, error } = olasResultado;
     if (!error && data && data.length) {
       // Mapeamos de vuelta al formato de columnas del Excel, para reusar el mismo cruce
       pkOlasRows = data.map(r => ({
@@ -3331,17 +3638,24 @@ async function pkInitPicking(){
         'CANT. EMP.': r.cant_emp,
         'OLA': r.ola
       }));
-      document.getElementById('pk-olasLabel').innerHTML = '✓ <b>' + pkOlasRows.length + ' órdenes</b> (última carga guardada) — sube un archivo nuevo para actualizar';
+      const primero = data[0];
+      document.getElementById('pk-olasLabel').textContent = primero && primero.modificado_por
+        ? primero.modificado_por + ' · ' + new Date(primero.modificado_en).toLocaleString('es-PE')
+        : 'Sin datos cargados';
     } else {
-      document.getElementById('pk-olasLabel').innerHTML = '⬆ Subir <b>OLAS_PICKING.xlsx</b>';
+      document.getElementById('pk-olasLabel').textContent = 'Sin datos cargados';
     }
   }
 
-  if (!pkAllocRows.length) {
-    const cache = pkCargarAllocLocal();
-    if (cache && cache.rows && cache.rows.length) {
-      pkAllocRows = cache.rows;
-      document.getElementById('pk-allocLabel').innerHTML = '✓ <b>' + (cache.filename || 'Allocation') + '</b> — ' + pkAllocRows.length + ' líneas (guardado en este equipo) — sube uno nuevo para actualizar';
+  if (allocResultado) {
+    if (allocResultado.rows && allocResultado.rows.length) {
+      pkAllocRows = allocResultado.rows;
+      const meta = allocResultado.meta;
+      document.getElementById('pk-allocLabel').textContent = meta
+        ? meta.modificado_por + ' · ' + new Date(meta.modificado_en).toLocaleString('es-PE')
+        : 'Sin datos cargados';
+    } else {
+      document.getElementById('pk-allocLabel').textContent = 'Sin datos cargados';
     }
   }
 
@@ -3386,23 +3700,23 @@ async function pkHandleOlasFile(input){
   pkClearError();
   const file = input.files[0];
   if (!file) return;
-  document.getElementById('pk-olasLabel').innerHTML = 'Cargando…';
+  document.getElementById('pk-olasLabel').textContent = 'Cargando…';
   try {
     const rows = await pkReadWorkbook(file);
     pkValidateColumns(rows, PK_OLAS_COLS, 'OLAS_PICKING.xlsx');
     pkOlasRows = rows;
-    document.getElementById('pk-olasLabel').innerHTML = '✓ <b>' + file.name + '</b> — ' + rows.length + ' órdenes (guardando…)';
+    document.getElementById('pk-olasLabel').textContent = 'Guardando…';
 
     // 1) Se guarda en Supabase de inmediato, sin esperar el CSV
     const guardado = await pkUpsertOlasToSupabase();
-    document.getElementById('pk-olasLabel').innerHTML = guardado
-      ? '✓ <b>' + file.name + '</b> — ' + rows.length + ' órdenes · guardado en Supabase'
-      : '⚠ <b>' + file.name + '</b> — ' + rows.length + ' órdenes · no se guardó (ver error abajo)';
+    document.getElementById('pk-olasLabel').textContent = guardado
+      ? currentUserNombre + ' · ' + new Date().toLocaleString('es-PE')
+      : '⚠ No se guardó (ver error abajo)';
 
     // 2) Recién ahora, si el CSV ya estaba cargado, se dispara el cálculo
     pkTryCruzar();
   } catch (err) {
-    document.getElementById('pk-olasLabel').innerHTML = '⬆ Subir <b>OLAS_PICKING.xlsx</b>';
+    document.getElementById('pk-olasLabel').textContent = 'Sin datos cargados';
     pkShowError('Error cargando OLAS_PICKING: ' + err.message);
   }
 }
@@ -3416,42 +3730,114 @@ async function pkHandleAllocFile(input){
   }
   const file = input.files[0];
   if (!file) return;
-  document.getElementById('pk-allocLabel').innerHTML = 'Cargando…';
+  document.getElementById('pk-allocLabel').textContent = 'Cargando…';
   try {
     const rows = await pkReadWorkbook(file);
     pkValidateColumns(rows, PK_ALLOC_COLS, 'Allocation.csv');
     pkAllocRows = rows;
-    document.getElementById('pk-allocLabel').innerHTML = '✓ <b>' + file.name + '</b> — ' + rows.length + ' líneas';
-    pkGuardarAllocLocal(rows, file.name);
+    document.getElementById('pk-allocLabel').textContent = 'Guardando…';
+    const guardado = await pkGuardarAllocEnSupabase(rows, file.name);
+    document.getElementById('pk-allocLabel').textContent = guardado
+      ? currentUserNombre + ' · ' + new Date().toLocaleString('es-PE')
+      : '⚠ No se guardó (ver error abajo)';
     pkTryCruzar();
   } catch (err) {
-    document.getElementById('pk-allocLabel').innerHTML = '⬆ Subir <b>Allocation.csv</b>';
+    document.getElementById('pk-allocLabel').textContent = 'Sin datos cargados';
     pkShowError('Error cargando Allocation: ' + err.message);
   }
 }
 
-// Guardamos Allocation en el navegador de quien lo cargó (localStorage), para que si
-// cierra y vuelve a abrir la página, no tenga que subir el archivo de nuevo — solo cuando
-// suba uno nuevo se reemplaza. Es local a ese navegador/equipo, no se comparte con nadie más.
-const PK_ALLOC_STORAGE_KEY = 'pk_allocation_cache_v1';
-function pkGuardarAllocLocal(rows, filename){
+// Allocation ahora se guarda en Supabase (compartido entre todos, no solo en tu navegador) —
+// como es una foto completa de las tareas pendientes cada vez que se sube, primero se borra
+// lo anterior y se inserta todo de nuevo en lotes (por el tamaño, ~11,000 filas).
+const PK_ALLOC_COLS_DB = ['nro_orden','estado','tipo_asignacion','nro_tarea','de_ubicacion','sku','descrip_art','lote','caducidad','cant_asignada','nro_lpn_entrada','hora_creacion','numero_ejecucion','um_asignacion','cant_asig_displays'];
+
+function pkFilaAllocADB(r){
+  return {
+    nro_orden: r['Nro Orden'], estado: r['Estado'], tipo_asignacion: r['Tipo de asignacion'],
+    nro_tarea: r['Nro de Tarea'], de_ubicacion: r['De ubicacion'], sku: r['SKU'],
+    descrip_art: r['Descrip Art'], lote: r['Lote'], caducidad: r['Caducidad'],
+    cant_asignada: Number(r['Cant Asignada']) || 0, nro_lpn_entrada: r['Nro LPN Entrada'],
+    hora_creacion: r['Hora Creacion'], numero_ejecucion: r['Numero de ejecucion'],
+    um_asignacion: r['UM de asignacion'], cant_asig_displays: Number(r['Cant Asig Displays']) || 0
+  };
+}
+
+async function pkGuardarAllocEnSupabase(rows, filename){
   try {
-    localStorage.setItem(PK_ALLOC_STORAGE_KEY, JSON.stringify({ filename, rows, guardadoEn: new Date().toISOString() }));
+    const { error: delError } = await sb.from('allocation_data').delete().gte('id', 0);
+    if (delError) { pkShowError('No se pudo limpiar Allocation anterior en Supabase: ' + delError.message + ' (¿ya creaste la tabla "allocation_data"?)'); return false; }
+
+    const filas = rows.map(pkFilaAllocADB);
+    const LOTE = 500;
+    for (let i = 0; i < filas.length; i += LOTE) {
+      const lote = filas.slice(i, i + LOTE);
+      const { error } = await sb.from('allocation_data').insert(lote);
+      if (error) { pkShowError('No se pudo guardar Allocation en Supabase (lote ' + (i / LOTE + 1) + '): ' + error.message); return false; }
+    }
+
+    const { error: metaError } = await sb.from('allocation_meta')
+      .upsert(withAudit({ id: 1, filename, total_filas: rows.length }), { onConflict: 'id' });
+    if (metaError) { pkShowError('Allocation se guardó, pero no se pudo actualizar quién lo cargó: ' + metaError.message); return false; }
+
+    return true;
   } catch (e) {
-    console.warn('[Picking] No se pudo guardar Allocation localmente (posiblemente el archivo es muy grande para localStorage):', e);
+    pkShowError('Error inesperado guardando Allocation en Supabase: ' + e.message);
+    return false;
   }
 }
-function pkCargarAllocLocal(){
-  try {
-    const raw = localStorage.getItem(PK_ALLOC_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch (e) { return null; }
+
+// Trae Allocation guardado en Supabase (compartido entre todos), en páginas de 1000 filas
+// (límite por defecto de una sola consulta), y lo reconstruye en el mismo formato del Excel.
+async function pkCargarAllocDeSupabase(){
+  const PAGINA = 1000;
+
+  // Pedimos el conteo total y la primera página en paralelo con los metadatos —
+  // no hace falta esperar una cosa para pedir la otra.
+  const [{ count, error: countError }, { data: meta }] = await Promise.all([
+    sb.from('allocation_data').select('id', { count: 'exact', head: true }),
+    sb.from('allocation_meta').select('*').eq('id', 1).single()
+  ]);
+  if (countError) { pkShowError('No se pudo leer Allocation guardado: ' + countError.message); return null; }
+  if (!count) return null;
+
+  // En vez de pedir las páginas una por una (y esperar cada una antes de pedir la siguiente),
+  // las pedimos TODAS al mismo tiempo — esto es lo que realmente hacía lenta la carga.
+  const totalPaginas = Math.ceil(count / PAGINA);
+  const pedidos = [];
+  for (let p = 0; p < totalPaginas; p++) {
+    const desde = p * PAGINA;
+    pedidos.push(sb.from('allocation_data').select('*').range(desde, desde + PAGINA - 1));
+  }
+  const resultados = await Promise.all(pedidos);
+  const todas = [];
+  for (const r of resultados) {
+    if (r.error) { pkShowError('No se pudo leer Allocation guardado: ' + r.error.message); return null; }
+    if (r.data) todas.push(...r.data);
+  }
+  if (!todas.length) return null;
+
+  const rows = todas.map(r => ({
+    'Nro Orden': r.nro_orden, 'Estado': r.estado, 'Tipo de asignacion': r.tipo_asignacion,
+    'Nro de Tarea': r.nro_tarea, 'De ubicacion': r.de_ubicacion, 'SKU': r.sku,
+    'Descrip Art': r.descrip_art, 'Lote': r.lote, 'Caducidad': r.caducidad,
+    'Cant Asignada': r.cant_asignada, 'Nro LPN Entrada': r.nro_lpn_entrada,
+    'Hora Creacion': r.hora_creacion, 'Numero de ejecucion': r.numero_ejecucion,
+    'UM de asignacion': r.um_asignacion, 'Cant Asig Displays': r.cant_asig_displays
+  }));
+
+  return { rows, meta };
 }
 
 function pkNormalizaCodigo(v){
   let s = String(v ?? '').trim();
   s = s.replace(/\.0$/, ''); // por si Excel lo dejó como número "20517758991.0"
   return s;
+}
+
+// Para cruzar por nombre de proveedor: mayúsculas, sin espacios de más, sin puntos/comas.
+function pkNormalizaNombre(v){
+  return String(v ?? '').toUpperCase().trim().replace(/\s+/g, ' ').replace(/[.,]/g, '');
 }
 
 // Tu tabla proveedores/citas guarda el código de proveedor con 1 dígito menos que el RUC
@@ -3581,24 +3967,40 @@ async function pkLoadCitasYReporte(){
   // así podemos distinguir "sin cita" de "ya completado, sí tenía cita".
   const todosCodigos = [...new Set(pkDetalle.map(d => d.codProveedor).filter(Boolean))];
 
-  // Mapa: código truncado (como está en tu tabla) -> lista de códigos completos (RUC de OLAS) que le corresponden
-  const truncadoAOriginal = {};
-  todosCodigos.forEach(cod => {
-    const trunc = pkCodigoParaCita(cod);
-    if (!truncadoAOriginal[trunc]) truncadoAOriginal[trunc] = [];
-    truncadoAOriginal[trunc].push(cod);
+  // MÉTODO PRINCIPAL: cruzamos por NOMBRE de proveedor contra tu tabla `proveedores`, que es
+  // la fuente real de verdad (citas.codigo_proveedor guarda justo el código de esa tabla, no el
+  // RUC de OLAS_PICKING). Esto evita depender de adivinar cuántos dígitos recortar.
+  const { data: proveedoresTabla, error: errorProveedores } = await sb.from('proveedores').select('codigo, descripcion');
+  if (errorProveedores) { pkShowError('No se pudo leer la tabla de proveedores: ' + errorProveedores.message); return; }
+  const nombreACodigoReal = {};
+  (proveedoresTabla || []).forEach(p => {
+    if (p.descripcion) nombreACodigoReal[pkNormalizaNombre(p.descripcion)] = p.codigo;
   });
-  const codigosTruncados = Object.keys(truncadoAOriginal);
+
+  // codOriginal (el que viene de OLAS_PICKING) -> código real a usar para consultar citas.
+  // 1º intento: por nombre (confiable). 2º intento, si no matcheó por nombre: el viejo truco
+  // de recortar el último dígito, por si acaso. Si nada matchea, se consulta tal cual.
+  const codigoOriginalACodigoReal = {};
+  pkCodigoRealAOriginales = {}; // global — lo usa también el popover de días en Citas para saber el estado de picking
+  todosCodigos.forEach(codOriginal => {
+    const nombre = estadosPorProveedor[codOriginal] ? estadosPorProveedor[codOriginal].proveedor : '';
+    const porNombre = nombreACodigoReal[pkNormalizaNombre(nombre)];
+    const codigoReal = porNombre || pkCodigoParaCita(codOriginal);
+    codigoOriginalACodigoReal[codOriginal] = codigoReal;
+    if (!pkCodigoRealAOriginales[codigoReal]) pkCodigoRealAOriginales[codigoReal] = [];
+    pkCodigoRealAOriginales[codigoReal].push(codOriginal);
+  });
+  const codigosParaConsultar = [...new Set(Object.values(codigoOriginalACodigoReal))];
 
   pkCitasPorProveedor = {};
-  if (codigosTruncados.length) {
+  if (codigosParaConsultar.length) {
     const { data: citas, error } = await sb.from('citas')
       .select('id, codigo_proveedor, fecha, hora_inicio, hora_fin, tipo, estado')
-      .in('codigo_proveedor', codigosTruncados);
+      .in('codigo_proveedor', codigosParaConsultar);
     if (error) { pkShowError('No se pudo leer citas: ' + error.message); return; }
     (citas || []).forEach(c => {
-      const truncKey = pkNormalizaCodigo(c.codigo_proveedor);
-      const originales = truncadoAOriginal[truncKey] || [];
+      const codigoReal = pkNormalizaCodigo(c.codigo_proveedor);
+      const originales = pkCodigoRealAOriginales[codigoReal] || [];
       originales.forEach(codOriginal => {
         if (!pkCitasPorProveedor[codOriginal]) pkCitasPorProveedor[codOriginal] = [];
         pkCitasPorProveedor[codOriginal].push(c);
@@ -3627,15 +4029,34 @@ async function pkLoadCitasYReporte(){
   // por eso no salen en Recojo/Facturación; los mostramos aparte para que quede claro que no es un bug.
   pkCompletados = todosCodigos
     .filter(cod => !porProveedor[cod] && pkCitasPorProveedor[cod])
-    .map(cod => ({ codProveedor: cod, proveedor: estadosPorProveedor[cod] ? estadosPorProveedor[cod].proveedor : cod, estadoResumen: pkResumenTexto(cod) }));
+    .map(cod => ({
+      codProveedor: cod,
+      proveedor: estadosPorProveedor[cod] ? estadosPorProveedor[cod].proveedor : cod,
+      estadoResumen: pkResumenTexto(cod),
+      tipos: [...new Set(pkCitasPorProveedor[cod].map(c => c.tipo))]
+    }));
 
   pkRenderReporte(porProveedor);
   pkRenderUbicaciones(asignados);
   pkRenderDateMenu();
+
+  // "Facturaciones pendientes" (en Citas) puede haberse pintado ANTES de que esta data
+  // estuviera lista — si ese panel ya está en pantalla, lo repintamos ahora que sí hay con
+  // qué cruzar. Silencioso, sin aviso ni botón: solo la conexión que faltaba.
+  if (document.getElementById('facturacionesPendientesLista') && typeof loadFacturacionesPendientes === 'function') {
+    loadFacturacionesPendientes();
+  }
 }
 
 function pkUrgencia(fecha, horaInicio){
-  if (!fecha || !horaInicio) return 'warn';
+  if (!fecha) return 'warn';
+  if (!horaInicio) {
+    // Sin hora (facturación: la fecha es la fecha de registro) — comparamos solo por día
+    const hoy = new Date().toISOString().slice(0, 10);
+    if (fecha < hoy) return 'late';
+    if (fecha === hoy) return 'warn';
+    return 'ok';
+  }
   const cita = new Date(fecha + 'T' + horaInicio);
   const diffMin = (cita - new Date()) / 60000;
   if (diffMin < 0) return 'late';
@@ -3646,10 +4067,12 @@ function pkUrgencia(fecha, horaInicio){
 function pkTicketHtml(g, c){
   const urg = pkUrgencia(c.fecha, c.hora_inicio);
   const badge = urg === 'late' ? 'Vencida' : (urg === 'warn' ? 'Próxima' : 'A tiempo');
-  return '<div class="pk-ticket pk-' + urg + ' pk-printOnlyHide" onclick="pkToggleSheet(\'pk-sheet-' + c.id + '\')">'
+  const tipoTxt = c.tipo === 'facturacion' ? 'Facturación' : 'Regular';
+  const tipoClase = c.tipo === 'facturacion' ? 'pk-tipoTagFact' : 'pk-tipoTagReg';
+  return '<div class="pk-ticket pk-' + urg + ' pk-printOnlyHide" data-cod="' + g.codProveedor + '" data-nombre="' + g.proveedor.toLowerCase() + '" onclick="pkToggleSheet(\'pk-sheet-' + c.id + '\')">'
     + '<div class="pk-ticketBar"></div>'
     + '<div class="pk-ticketBody">'
-    + '<div class="pk-ticketProv"><div class="pk-name">' + g.proveedor + '</div><div class="pk-code">' + c.fecha + '</div></div>'
+    + '<div class="pk-ticketProv"><div class="pk-name">' + g.proveedor + ' <span class="pk-tipoTag ' + tipoClase + '">' + tipoTxt + '</span></div><div class="pk-code">' + c.fecha + '</div></div>'
     + '<span class="pk-badge">' + badge + '</span>'
     + '<div class="pk-metric"><div class="pk-v">' + g.tareas.size + '</div><div class="pk-l">Tareas</div></div>'
     + '<div class="pk-metric"><div class="pk-v">' + g.ubicaciones.size + '</div><div class="pk-l">Ubicaciones</div></div>'
@@ -3658,7 +4081,7 @@ function pkTicketHtml(g, c){
     + '</div></div>';
 }
 
-function pkSheetHtml(g, c){
+function pkSheetHtml(g, c, claseAdicional){
   // Consolidamos por Nro. de Tarea: Tipo y Motivo son únicos por tarea (no se repiten por línea).
   // Dentro de cada tarea, consolidamos también por Ubicación distinta (sumando el Display de
   // todas las líneas que caen en la misma ubicación), en vez de repetir la ubicación por cada línea.
@@ -3696,12 +4119,14 @@ function pkSheetHtml(g, c){
       + '</div></div>';
   }).join('');
 
-  return '<div class="pk-card pk-sheet" id="pk-sheet-' + c.id + '">'
+  const fechaTxt = c.fecha ? (c.fecha + ' ' + (c.hora_inicio || '').slice(0, 5)) : 'Sin cita agendada';
+  const claseExtra = (c.fecha ? '' : ' pk-sheetSinCita') + (claseAdicional ? ' ' + claseAdicional : '');
+  return '<div class="pk-card pk-sheet' + claseExtra + '" id="pk-sheet-' + c.id + '">'
     + '<div style="padding:16px 18px;">'
     + '<div class="pk-sheetHead"><div><h3>Hoja de picking — ' + g.proveedor + '</h3><div class="pk-sub">Cod. ' + g.codProveedor + '</div></div>'
     + '<button class="pk-btn pk-btnPrimary pk-printOnlyHide" onclick="window.print()">Imprimir hoja</button></div>'
     + '<div class="pk-taskGrid">' + tareasHtml + '</div>'
-    + '<div class="pk-sheetMeta"><div><div class="pk-lbl">Responsable</div>—</div><div><div class="pk-lbl">Fecha de cita</div>' + c.fecha + ' ' + (c.hora_inicio || '').slice(0, 5) + '</div></div>'
+    + '<div class="pk-sheetMeta"><div><div class="pk-lbl">Responsable</div>—</div><div><div class="pk-lbl">Fecha de cita</div>' + fechaTxt + '</div></div>'
     + '</div></div>';
 }
 
@@ -3755,39 +4180,143 @@ function pkAplicarFiltroTipo(){
   pkRenderUbicaciones(asignados);
 }
 
+// Quita el último dígito si parece un código numérico — así "2052500672" y "20525006728"
+// (el mismo proveedor, con o sin el dígito de más) matchean igual al buscar.
+function pkCodigoSinUltimoDigito(s){
+  s = String(s || '').trim();
+  return (/^\d+$/.test(s) && s.length > 1) ? s.slice(0, -1) : s;
+}
+
+function pkFiltrarTarjetasProveedor(){
+  const q = document.getElementById('pk-filtroProveedorReporte').value.trim().toLowerCase();
+  const cards = document.querySelectorAll('#pk-recojoList .pk-ticket, #pk-atrasadosList .pk-ticket, #pk-sinCitaList .pk-ticket');
+  if (!q) { cards.forEach(c => { c.style.display = ''; }); return; }
+  const qSinUltimo = pkCodigoSinUltimoDigito(q);
+  cards.forEach(card => {
+    const cod = (card.dataset.cod || '').toLowerCase();
+    const nombre = card.dataset.nombre || '';
+    const codSinUltimo = pkCodigoSinUltimoDigito(cod);
+    const matchCodigo = cod.includes(q) || codSinUltimo.includes(qSinUltimo) || cod.includes(qSinUltimo);
+    const matchNombre = nombre.includes(q);
+    card.style.display = (matchCodigo || matchNombre) ? '' : 'none';
+  });
+}
+
+// Filtro propio (independiente del de arriba) solo para la tabla "Sin pendientes".
+function pkFiltrarCompletados(){
+  const el = document.getElementById('pk-filtroCompletados');
+  if (!el) return;
+  const q = el.value.trim().toLowerCase();
+  const filas = document.querySelectorAll('#pk-completadosBody tr[data-cod]');
+  if (!q) { filas.forEach(f => { f.style.display = ''; }); return; }
+  const qSinUltimo = pkCodigoSinUltimoDigito(q);
+  filas.forEach(fila => {
+    const cod = (fila.dataset.cod || '').toLowerCase();
+    const nombre = fila.dataset.nombre || '';
+    const codSinUltimo = pkCodigoSinUltimoDigito(cod);
+    const match = cod.includes(q) || codSinUltimo.includes(qSinUltimo) || cod.includes(qSinUltimo) || nombre.includes(q);
+    fila.style.display = match ? '' : 'none';
+  });
+}
+
 function pkRenderReporte(porProveedor){
   const filtroTipo = document.getElementById('pk-filtroTipoCita').value;
-  const recojoHtml = [], facturacionHtml = [];
+  const generalHtml = [], atrasadosHtml = [];
+  const hoy = new Date().toISOString().slice(0, 10);
 
   Object.values(porProveedor).forEach(g => {
     const citasProv = pkCitasPorProveedor[g.codProveedor] || [];
     citasProv.forEach(c => {
+      // Atrasados: fecha ya pasada y todavía pendiente (facturación sin facturar, o recojo con
+      // tareas aún asignadas). Ignora a propósito TANTO el filtro de fechas como el de tipo de
+      // "Picking Regular" — esos filtros de ahí solo deben afectar ese apartado, no Atrasados.
+      const estaVencido = c.fecha < hoy && (c.tipo !== 'facturacion' || c.estado !== 'facturado');
+      if (estaVencido) atrasadosHtml.push(pkTicketHtml(g, c) + pkSheetHtml(g, c, 'pk-sheetAtrasado'));
+
+      // El apartado "Picking Regular" sí respeta AMBOS filtros (tipo y fecha) — son los suyos.
       if (filtroTipo && c.tipo !== filtroTipo) return;
       if (!pkFechaAplica(c.fecha)) return;
-      // La hoja va pegada justo debajo de su tarjeta, no en una sección aparte
-      const bloque = pkTicketHtml(g, c) + pkSheetHtml(g, c);
-      if (c.tipo === 'facturacion') facturacionHtml.push(bloque); else recojoHtml.push(bloque);
+      generalHtml.push(pkTicketHtml(g, c) + pkSheetHtml(g, c));
     });
   });
 
-  document.getElementById('pk-recojoList').innerHTML = recojoHtml.join('') || '<div style="color:var(--faint);font-size:12.5px;padding:8px 0">No hay tareas de recojo con cita en el filtro actual.</div>';
-  document.getElementById('pk-facturacionList').innerHTML = facturacionHtml.join('') || '<div style="color:var(--faint);font-size:12.5px;padding:8px 0">No hay facturaciones con cita en el filtro actual.</div>';
+  const atrasadosSeccion = document.getElementById('pk-atrasadosSeccion');
+  const atrasadosCount = document.getElementById('pk-atrasadosCount');
+  if (atrasadosHtml.length) {
+    atrasadosSeccion.style.display = '';
+    atrasadosCount.textContent = atrasadosHtml.length;
+    document.getElementById('pk-atrasadosList').innerHTML = atrasadosHtml.join('');
+  } else {
+    atrasadosSeccion.style.display = 'none';
+  }
+
+  document.getElementById('pk-recojoList').innerHTML = generalHtml.join('') || '<div style="color:var(--faint);font-size:12.5px;padding:8px 0">No hay tareas con cita en el filtro actual.</div>';
   // Los códigos de barra se generan al abrir cada hoja o al imprimir (ver pkToggleSheet / pkPrintAll),
   // no aquí, para no recalcular cientos de códigos en cada cambio de filtro.
 
-  document.getElementById('pk-warnCount').textContent = pkSinCita.length;
-  document.getElementById('pk-sinCitaBody').innerHTML = pkSinCita.map(g =>
-    '<tr><td>' + g.proveedor + '</td><td class="pk-code">' + g.codProveedor + '</td>'
-    + '<td class="pk-num">' + g.tareas.size + '</td><td class="pk-num">' + g.ubicaciones.size + '</td><td class="pk-num">' + g.displays + '</td>'
-    + '<td><div class="pk-pkRowActions">'
-    + '<button class="pk-iconBtn pk-iconBtnOk" onclick="pkAgendarDesde(\'' + g.proveedor.replace(/'/g, "\\'") + '\')">+ Agendar cita</button>'
-    + '<button class="pk-iconBtn" onclick="pkIgnorarAlerta(this,\'' + g.codProveedor + '\')">Ignorar</button>'
-    + '</div></td></tr>'
-  ).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--faint);padding:14px">Todos los proveedores con tareas asignadas ya tienen cita.</td></tr>';
+function pkSinCitaCardHtml(g){
+  const sheetId = 'pk-sheet-sincita-' + g.codProveedor;
+  return '<div class="pk-ticket pk-warn pk-printOnlyHide" data-cod="' + g.codProveedor + '" data-nombre="' + g.proveedor.toLowerCase() + '">'
+    + '<div class="pk-ticketBar"></div>'
+    + '<div class="pk-ticketBody">'
+    + '<div class="pk-ticketProv"><div class="pk-name">' + g.proveedor + '</div><div class="pk-code">' + g.codProveedor + '</div></div>'
+    + '<span class="pk-badge">Sin cita</span>'
+    + '<div class="pk-metric"><div class="pk-v">' + g.tareas.size + '</div><div class="pk-l">Tareas</div></div>'
+    + '<div class="pk-metric"><div class="pk-v">' + g.ubicaciones.size + '</div><div class="pk-l">Ubicaciones</div></div>'
+    + '<div class="pk-metric"><div class="pk-v">' + g.displays + '</div><div class="pk-l">Display total</div></div>'
+    + '<div class="pk-ticketActions pk-pkRowActions">'
+    + '<button class="pk-iconBtn" onclick="pkToggleSheet(\'' + sheetId + '\')">Ver hoja ▾</button>'
+    + '</div></div></div>'
+    // La hoja va pegada justo debajo de la tarjeta, igual que con Recojo/Facturación.
+    + pkSheetHtml(g, { id: 'sincita-' + g.codProveedor, fecha: null, hora_inicio: null });
+}
 
-  document.getElementById('pk-completadosBody').innerHTML = pkCompletados.map(g =>
-    '<tr><td>' + g.proveedor + '</td><td class="pk-code">' + g.codProveedor + '</td><td style="color:var(--faint);font-size:12px">' + (g.estadoResumen || '') + '</td></tr>'
-  ).join('') || '<tr><td colspan="3" style="text-align:center;color:var(--faint);padding:14px">No hay proveedores con cita que ya hayan terminado su picking.</td></tr>';
+  document.getElementById('pk-warnCount').textContent = pkSinCita.length;
+  document.getElementById('pk-sinCitaList').innerHTML = pkSinCita.map(pkSinCitaCardHtml).join('')
+    || '<div style="color:var(--faint);font-size:12.5px;padding:8px 0">Todos los proveedores con tareas asignadas ya tienen cita.</div>';
+
+  document.getElementById('pk-completadosBody').innerHTML = pkCompletados.map(g => {
+    const tags = (g.tipos || []).map(t =>
+      '<span class="pk-tipoTag ' + (t === 'facturacion' ? 'pk-tipoTagFact' : 'pk-tipoTagReg') + '">' + (t === 'facturacion' ? 'Facturación' : 'Regular') + '</span>'
+    ).join(' ');
+    return '<tr data-cod="' + g.codProveedor + '" data-nombre="' + g.proveedor.toLowerCase() + '"><td>' + g.proveedor + '</td><td class="pk-code">' + g.codProveedor + '</td><td>' + tags + '</td><td style="color:var(--faint);font-size:12px">' + (g.estadoResumen || '') + '</td></tr>';
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--faint);padding:14px">No hay proveedores con cita que ya hayan terminado su picking.</td></tr>';
+  pkFiltrarCompletados();
+
+  pkFiltrarTarjetasProveedor(); // reaplica la búsqueda por proveedor sobre las tarjetas recién dibujadas
+  pkRenderKPIs();
+}
+
+// "Picada" a nivel de TAREA = ninguna de sus líneas sigue en Asignado (ya pasó a Finalizado/Cancelado).
+// Los proveedores Regular/Facturación "por picar" se cuentan sobre los que sí tienen algo pendiente
+// (pkGrupoActual), separados según el tipo de cita que tengan asociada.
+function pkRenderKPIs(){
+  const tareaEstados = {};
+  pkDetalle.forEach(d => {
+    if (!d.codProveedor || !d.nroTarea) return;
+    if (!tareaEstados[d.nroTarea]) tareaEstados[d.nroTarea] = new Set();
+    tareaEstados[d.nroTarea].add(d.estado);
+  });
+  let tareasPorPicar = 0, tareasPicadas = 0;
+  Object.values(tareaEstados).forEach(set => { if (set.has('Asignado')) tareasPorPicar++; else tareasPicadas++; });
+
+  const provRegular = new Set(), provFact = new Set();
+  Object.values(pkGrupoActual || {}).forEach(g => {
+    (pkCitasPorProveedor[g.codProveedor] || []).forEach(c => {
+      if (c.tipo === 'facturacion') provFact.add(g.codProveedor); else provRegular.add(g.codProveedor);
+    });
+  });
+
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const totalTareas = tareasPorPicar + tareasPicadas;
+  const pct = totalTareas ? Math.round((tareasPicadas / totalTareas) * 100) : 0;
+  set('pk-kpiTareasFrac', tareasPicadas + '/' + totalTareas);
+  const fill = document.getElementById('pk-kpiTareasFill');
+  if (fill) fill.style.width = pct + '%';
+  set('pk-kpiProvRegular', provRegular.size);
+  set('pk-kpiProvFact', provFact.size);
+  set('pk-kpiProvPicados', (pkCompletados || []).length);
+  set('pk-kpiAtrasados', document.getElementById('pk-atrasadosCount') ? document.getElementById('pk-atrasadosCount').textContent : '0');
 }
 
 function pkRenderUbicaciones(asignados){
@@ -3806,6 +4335,35 @@ function pkRenderUbicaciones(asignados){
   pkUbicacionesActuales = rows;
   document.getElementById('pk-ubicCount').textContent = rows.length;
   document.getElementById('pk-ubicBody').innerHTML = rows.map(r =>
+    '<tr><td class="pk-code">' + r.ubicacion + '</td><td class="pk-motivo">' + r.motivo + '</td><td class="pk-num">' + r.tareas.size + '</td><td class="pk-num">' + (Math.round(r.displays * 100) / 100) + '</td></tr>'
+  ).join('');
+
+  pkRenderUbicacionesAtrasadas(asignados);
+}
+
+// Igual que pkRenderUbicaciones, pero solo para lo VENCIDO (fecha ya pasada y sin resolver),
+// ignorando a propósito el filtro de fecha de arriba — mismo criterio que la sección Atrasados.
+function pkRenderUbicacionesAtrasadas(asignados){
+  const hoy = new Date().toISOString().slice(0, 10);
+  const map = {};
+  asignados.forEach(d => {
+    const citasProv = pkCitasPorProveedor[d.codProveedor] || [];
+    const citasVencidas = citasProv.filter(c =>
+      c.fecha < hoy && (c.tipo !== 'facturacion' || c.estado !== 'facturado')
+    );
+    if (!citasVencidas.length) return;
+    const key = d.ubicacion || '—';
+    if (!map[key]) map[key] = { ubicacion: d.ubicacion || '—', motivo: d.motivo, tareas: new Set(), displays: 0 };
+    map[key].tareas.add(d.nroTarea);
+    map[key].displays += d.displays;
+  });
+  const rows = Object.values(map).sort((a, b) => a.ubicacion.localeCompare(b.ubicacion));
+  pkUbicacionesAtrasadasActuales = rows;
+  const countEl = document.getElementById('pk-ubicAtrasadosCount');
+  const bodyEl = document.getElementById('pk-ubicAtrasadosBody');
+  if (!countEl || !bodyEl) return;
+  countEl.textContent = rows.length;
+  bodyEl.innerHTML = rows.map(r =>
     '<tr><td class="pk-code">' + r.ubicacion + '</td><td class="pk-motivo">' + r.motivo + '</td><td class="pk-num">' + r.tareas.size + '</td><td class="pk-num">' + (Math.round(r.displays * 100) / 100) + '</td></tr>'
   ).join('');
 }
@@ -3853,44 +4411,70 @@ function pkRenderCalendarioGrid(){
     const marcado = tieneCita && (pkFechasSeleccionadas === null || pkFechasSeleccionadas === undefined || pkFechasSeleccionadas.has(fechaISO));
     const clases = tieneCita ? 'pk-calConCita' + (marcado ? ' pk-calMarcado' : '') : 'pk-calSinCita';
     html += tieneCita
-      ? '<span class="' + clases + '" onclick="pkCalendarioClickDia(\'' + fechaISO + '\')">' + d + '</span>'
+      ? '<span class="' + clases + '" onclick="pkCalendarioClickDia(\'' + fechaISO + '\', event)">' + d + '</span>'
       : '<span class="' + clases + '">' + d + '</span>';
   }
   grid.innerHTML = html;
 }
 
-function pkCalendarioClickDia(fechaISO){
+let pkCalUltimoClick = null; // última fecha clicada, para poder hacer Shift+clic = rango
+
+function pkCalendarioClickDia(fechaISO, evt){
   if (pkFechasSeleccionadas === null || pkFechasSeleccionadas === undefined) {
     pkFechasSeleccionadas = new Set(pkFechasConCita());
   }
-  if (pkFechasSeleccionadas.has(fechaISO)) pkFechasSeleccionadas.delete(fechaISO);
-  else pkFechasSeleccionadas.add(fechaISO);
-  pkAplicarFiltroFechaEnVivo();
+  const fechasConCita = pkFechasConCita();
+
+  if (evt && evt.shiftKey && pkCalUltimoClick && fechasConCita.has(pkCalUltimoClick)) {
+    // Rango entre el último día clicado y este, saltando solo los días que sí tienen cita
+    const [desde, hasta] = pkCalUltimoClick <= fechaISO ? [pkCalUltimoClick, fechaISO] : [fechaISO, pkCalUltimoClick];
+    [...fechasConCita].filter(f => f >= desde && f <= hasta).forEach(f => pkFechasSeleccionadas.add(f));
+  } else {
+    if (pkFechasSeleccionadas.has(fechaISO)) pkFechasSeleccionadas.delete(fechaISO);
+    else pkFechasSeleccionadas.add(fechaISO);
+  }
+  pkCalUltimoClick = fechaISO;
+  // Solo marcamos visualmente — para que aplique de verdad hay que darle al botón Filtrar
+  pkRenderCalendarioGrid();
+  pkActualizarResumenFechas(pkFechasConCita());
 }
 
 function pkCalendarioTodos(){
   pkFechasSeleccionadas = null;
-  pkAplicarFiltroFechaEnVivo();
+  pkRenderCalendarioGrid();
+  pkActualizarResumenFechas(pkFechasConCita());
 }
 function pkCalendarioNinguno(){
   pkFechasSeleccionadas = new Set();
-  pkAplicarFiltroFechaEnVivo();
-}
-
-// El filtro se aplica al instante con cada clic — no hace falta botón "Aplicar" ni cerrar el calendario.
-function pkAplicarFiltroFechaEnVivo(){
   pkRenderCalendarioGrid();
   pkActualizarResumenFechas(pkFechasConCita());
+}
+
+// Este es el que de verdad aplica el filtro al Reporte de prioridades y a Ubicaciones asociadas.
+function pkFiltrarFechas(){
   pkRenderReporte(pkGrupoActual);
   const asignados = pkDetalle.filter(d => d.estado === 'Asignado' && d.codProveedor);
   pkRenderUbicaciones(asignados);
+  document.getElementById('pk-dateMenu').classList.remove('show');
+}
+
+function pkFechaCorta(iso){
+  // "2026-08-04" -> "4/08"
+  const [, mo, d] = iso.split('-');
+  return parseInt(d, 10) + '/' + mo;
 }
 
 function pkActualizarResumenFechas(todasLasFechas){
   const total = todasLasFechas.size;
-  const seleccionadas = (pkFechasSeleccionadas === null || pkFechasSeleccionadas === undefined) ? total : pkFechasSeleccionadas.size;
-  document.getElementById('pk-dateSummary').textContent =
-    (pkFechasSeleccionadas === null || pkFechasSeleccionadas === undefined) ? '(todas — ' + total + ')' : '(' + seleccionadas + ' de ' + total + ')';
+  const esTodas = pkFechasSeleccionadas === null || pkFechasSeleccionadas === undefined;
+  const elResumen = document.getElementById('pk-dateSummary');
+
+  if (esTodas) { elResumen.textContent = '(todas — ' + total + ')'; return; }
+  if (!pkFechasSeleccionadas.size) { elResumen.textContent = '(ninguna)'; return; }
+
+  const ordenadas = [...pkFechasSeleccionadas].sort();
+  const desde = ordenadas[0], hasta = ordenadas[ordenadas.length - 1];
+  elResumen.textContent = desde === hasta ? '(' + pkFechaCorta(desde) + ')' : '(' + pkFechaCorta(desde) + ' a ' + pkFechaCorta(hasta) + ')';
 }
 
 function pkParseFecha(value){
@@ -3926,7 +4510,7 @@ function pkParseFecha(value){
 
 async function pkUpsertOlasToSupabase(){
   if (!pkOlasRows.length) return false;
-  const rows = pkOlasRows.map(r => ({
+  const rows = pkOlasRows.map(r => withAudit({
     orden: r['ORDEN'],
     proveedor: r['PROVEEDOR'],
     cod_prov: r['COD. PROV'],
@@ -3941,7 +4525,7 @@ async function pkUpsertOlasToSupabase(){
   }));
   const { error } = await sb.from('olas_picking').upsert(rows, { onConflict: 'orden' });
   if (error) {
-    pkShowError('No se pudo guardar OLAS_PICKING en Supabase: ' + error.message + ' — revisa que exista la tabla "olas_picking" y sus políticas RLS (ver SQL sugerido).');
+    pkShowError('No se pudo guardar OLAS_PICKING en Supabase: ' + error.message + ' — revisa que exista la tabla "olas_picking", sus columnas modificado_por/modificado_en y sus políticas RLS.');
     return false;
   }
   return true;
@@ -3954,9 +4538,11 @@ function pkAgendarDesde(proveedor){
 function pkIgnorarAlerta(btn, codProveedor){
   if (!confirm('¿Seguro que quieres ignorar la alerta de este proveedor? No se te volverá a avisar mientras no tenga cita, en esta sesión.')) return;
   pkIgnorados.add(codProveedor);
-  const row = btn.closest('tr');
-  row.style.opacity = '0.35';
-  row.querySelector('.pk-pkRowActions').innerHTML = '<span style="color:var(--faint);font-size:11.5px">Ignorada</span>';
+  const card = btn.closest('.pk-ticket');
+  if (!card) return;
+  card.style.opacity = '0.35';
+  const acciones = card.querySelector('.pk-pkRowActions');
+  if (acciones) acciones.innerHTML = '<span style="color:var(--faint);font-size:11.5px">Ignorada</span>';
 }
 
 function pkShowTab(id, btn){
@@ -3994,21 +4580,69 @@ function pkExportarUbicaciones(){
   XLSX.utils.book_append_sheet(wb, ws, 'Ubicaciones');
   XLSX.writeFile(wb, 'ubicaciones_a_picar.xlsx');
 }
-function pkToggleDateMenu(){
-  document.getElementById('pk-dateMenu').classList.toggle('show');
+function pkToggleUbicAtrasados(btn){
+  const panel = document.getElementById('pk-ubicPanelAtrasados');
+  const willShow = !panel.classList.contains('show');
+  panel.classList.toggle('show');
+  if (willShow && btn) {
+    const r = btn.getBoundingClientRect();
+    let left = r.left;
+    const maxLeft = window.innerWidth - 440;
+    if (left > maxLeft) left = maxLeft;
+    panel.style.top = (r.bottom + 4) + 'px';
+    panel.style.left = Math.max(8, left) + 'px';
+  }
+}
+function pkExportarUbicacionesAtrasadas(){
+  if (!pkUbicacionesAtrasadasActuales.length) { alert('No hay ubicaciones atrasadas para exportar.'); return; }
+  const filas = pkUbicacionesAtrasadasActuales.map(r => ({
+    Ubicacion: r.ubicacion, Motivo: r.motivo, Tareas: r.tareas.size, Display: r.displays
+  }));
+  const ws = XLSX.utils.json_to_sheet(filas);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Ubicaciones atrasadas');
+  XLSX.writeFile(wb, 'ubicaciones_atrasadas.xlsx');
+}
+function pkToggleDateMenu(btn){
+  const menu = document.getElementById('pk-dateMenu');
+  const willShow = !menu.classList.contains('show');
+  menu.classList.toggle('show');
+  if (willShow && btn) {
+    const r = btn.getBoundingClientRect();
+    let left = r.left;
+    const maxLeft = window.innerWidth - 260; // ancho del popover + margen
+    if (left > maxLeft) left = Math.max(8, maxLeft);
+    let top = r.bottom + 4;
+    const maxTop = window.innerHeight - 480; // altura aproximada del popover + margen
+    if (top > maxTop) top = Math.max(8, maxTop);
+    menu.style.top = top + 'px';
+    menu.style.left = left + 'px';
+  }
 }
 function pkPrintAll(){
-  document.querySelectorAll('.pk-sheet').forEach(s => { s.classList.add('show'); pkRenderBarcodesIn(s); });
+  // Las hojas "sin cita" y "atrasados" quedan fuera: cada una tiene su propio botón de impresión.
+  document.querySelectorAll('.pk-sheet:not(.pk-sheetSinCita):not(.pk-sheetAtrasado)').forEach(s => { s.classList.add('show'); pkRenderBarcodesIn(s); });
+  window.print();
+}
+function pkImprimirAtrasados(){
+  document.querySelectorAll('.pk-sheet.pk-sheetAtrasado').forEach(s => { s.classList.add('show'); pkRenderBarcodesIn(s); });
   window.print();
 }
 document.addEventListener('click', function(e){
+  const path = e.composedPath ? e.composedPath() : [];
+  const dentroDe = (selectorClass) => path.some(el => el.classList && el.classList.contains(selectorClass));
+
   const menu = document.getElementById('pk-dateMenu');
-  if (menu && menu.classList.contains('show') && !e.target.closest('.pk-dateMenu') && !e.target.closest('.pk-btnLink')) {
+  if (menu && menu.classList.contains('show') && !dentroDe('pk-dateMenu') && !dentroDe('pk-btnLink')) {
     menu.classList.remove('show');
   }
   const ubic = document.getElementById('pk-ubicPanel');
-  if (ubic && ubic.classList.contains('show') && !e.target.closest('.pk-ubicPanel') && !e.target.closest('.pk-btnLink')) {
+  if (ubic && ubic.classList.contains('show') && !dentroDe('pk-ubicPanel') && !dentroDe('pk-btnLink')) {
     ubic.classList.remove('show');
+  }
+  const ubicAtrasados = document.getElementById('pk-ubicPanelAtrasados');
+  if (ubicAtrasados && ubicAtrasados.classList.contains('show') && !dentroDe('pk-ubicPanelAtrasados') && !dentroDe('pk-iconBtn')) {
+    ubicAtrasados.classList.remove('show');
   }
 });
 
